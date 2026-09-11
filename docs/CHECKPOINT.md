@@ -21,6 +21,9 @@
 ## Day 1 blocker
 Identify the on-chain distributor signer for TREE, DIVI, and KNOTS (PRD section 8.1). Public RPCs rate-limit anonymous calls; use Helius. Record evidence in `docs/RESEARCH.md`.
 
+## Sequencing with StonkFlow (decided 2026-09-11)
+The owner's other entry, StonkFlow (`../../agents/stonkflow`, AnsemHack Clawrena, token live by Sep 20), gets one day (Sep 13 or 14) for deploy, first live launch, and the ClawPump token. Stonk Ledger gets every other build day through Sep 17. After Sep 18, shift to StonkFlow onboarding. A StonkFlow flagship reward coin should be one of the demo coins here.
+
 ## Rules that apply throughout
 - Verify Jupiter and Helius parameter names from their docs before writing integration code.
 - Never print secrets. `.env` stays gitignored.
