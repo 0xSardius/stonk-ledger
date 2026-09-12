@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "helius": {
+      "command": "npx",
+      "args": ["-y", "helius-mcp@latest"],
+      "env": {
+        "HELIUS_API_KEY": "${HELIUS_API_KEY}",
+        "HELIUS_NETWORK": "mainnet-beta"
+      }
+    },
+    "solana-mcp-server": {
+      "type": "http",
+      "url": "https://mcp.solana.com/mcp"
+    }
+  }
+}

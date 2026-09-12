@@ -8,21 +8,40 @@ Stonk Ledger: a Stocklana hackathon entry (Solana Foundation, deadline 2026-09-1
 
 **Positioning (decided 2026-09-12):** Stock DRIP is the headline feature. The ledger is the plumbing DRIP needs and the proof that each run happened. Lead every pitch, README, and page with DRIP. Scoring is in `.superstack/entry-scoring.md`.
 
-**Current state:** docs only. No package.json, no source code yet. Read `docs/CHECKPOINT.md` first in every session; it holds the day-by-day status and blockers. `docs/PRD.md` v0.5 is the spec. `.superstack/idea-context.md` is the handoff from the idea phase (key mints, stack hints, competitors).
+**Current state:** scaffolded 2026-09-12. Pages, schema, seed script, health route, and worker stubs exist. No indexer, classifier, or keeper logic yet. Read `docs/CHECKPOINT.md` first in every session; it holds the day-by-day status and blockers. `docs/PRD.md` v0.5 is the spec. `.superstack/idea-context.md` and `.superstack/build-context.md` are the phase handoffs.
 
-## Commands (planned, per README)
+## Commands
 
 ```bash
-pnpm install
-cp .env.example .env     # fill in HELIUS_API_KEY and DATABASE_URL
-pnpm dev
+pnpm dev                 # Next.js dev server, http://localhost:3000
+pnpm build               # production build (must pass before every commit)
+pnpm typecheck           # tsc --noEmit
+pnpm lint                # eslint
+pnpm test                # vitest run, node environment
+pnpm test -- tests/stonkfun.test.ts   # single test file
+pnpm test:watch
+pnpm db:push             # push lib/db/schema.ts to DATABASE_URL (Neon)
+pnpm db:generate         # write SQL migrations to ./drizzle
+pnpm db:studio
+pnpm seed                # upsert coins from StonkFun; --pages=N, --decimals
+pnpm worker:indexer | worker:rate-cacher | worker:drip-keeper
+pnpm ci                  # build + typecheck + lint + format:check + test
 ```
 
-Nothing else exists yet. When the scaffold lands, add the real build, lint, test, and single-test commands here.
+`pnpm test` runs in a node environment. A component test must opt into jsdom with a `// @vitest-environment jsdom` comment at the top of the file.
 
 ## Stack
 
-Next.js 15 App Router, TypeScript, Tailwind, shadcn/ui, `@solana/kit` with wallet-standard (ConnectorKit or `@solana/react-hooks`), Postgres on Neon via Drizzle, Helius enhanced transactions, Jupiter swaps, grammY bot (stretch). Workers deploy on Railway.
+Next.js 16 App Router, React 19, TypeScript, Tailwind 4, shadcn/ui (base-nova style, components in `components/ui`), `@solana/kit` 7 with `@solana/react` and the kit wallet plugin (wallet-standard), Postgres on Neon via Drizzle (neon-http driver), Helius for RPC and enhanced transactions, Jupiter for swaps. Workers are plain TypeScript files under `workers/` started with `tsx`, one Railway service each. Node 22+.
+
+## Layout
+
+- `app/` routes, route handlers under `app/api/`, client components under `app/components/`, client-side Solana helpers under `app/lib/`. The app is mainnet-only; there is no cluster switcher.
+- `lib/` server-only code: `lib/env.ts` (zod-validated env, import only server-side), `lib/db/` (Drizzle schema and lazy client), `lib/stonkfun/` (API client and pure mappers).
+- `workers/` long-running loops sharing `workers/_loop.ts`.
+- `scripts/` one-shot CLIs run with `tsx`.
+- `tests/` Vitest, with mainnet fixtures under `tests/fixtures/`.
+- `components/ui/` shadcn components. Add more with `pnpm dlx shadcn@latest add <name>`.
 
 ## Architecture (PRD section 7)
 
@@ -45,7 +64,7 @@ Schema for all tables is in PRD 8.4. Keep it as the source of truth when writing
 
 ## External APIs
 
-- StonkFun public API, no key, 300 req/min: `https://www.stonkfun.xyz/api/public/v1` (OpenAPI at `/openapi.json`).
+- StonkFun public API, no key, 300 req/min, slow (10 to 20 s per call): `https://www.stonkfun.xyz/api/public/v1`. The OpenAPI spec at `/openapi.json` leaves item shapes undefined; `lib/stonkfun/client.ts` holds the verified shapes. Token list is `data.tokens[]` with nested `quote`, `transferFee.bps`, `market`; pagination in `data.pagination`. Quote decimals come only from `/tokens/{mint}/rewards`.
 - Helius: required for RPC and enhanced parsing. Public RPCs rate-limit and will block the Day 1 distributor research.
 - Jupiter: confirm current endpoint, field names, and Token-2022 integrator-fee support in the docs before writing any swap code. Do not write Jupiter or Helius calls from memory.
 

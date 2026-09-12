@@ -1,0 +1,84 @@
+{
+  "data": {
+    "tokens": [
+      {
+        "mint": "FjTfaSH861nVcbAxdFAHTvhoSL4kyR6wgTWynuJkapht",
+        "pool": "A86XgwL7tAp9v9YHBkx3ytDmtREFRar9rxhd92kdg5N1",
+        "name": "DividendCoin",
+        "symbol": "DIVI",
+        "quote": {
+          "mint": "Xs78JED6PFZxWc2wCEPspZW9kL3Se5J7L5TChKgsidH",
+          "symbol": "STRCX",
+          "name": "STRCX",
+          "logoUrl": "/api/asset/quote-logo/Xs78JED6PFZxWc2wCEPspZW9kL3Se5J7L5TChKgsidH?v=e893215f",
+          "category": "xstock",
+          "categoryLabel": "xStock"
+        },
+        "launchpad": "launchlab",
+        "mode": "reward",
+        "quoteOnlyFees": true,
+        "transferFee": { "bps": 300 },
+        "flywheel": { "active": true },
+        "imageUrl": "https://gateway.irys.xyz/FT9XVQdFwpkKMfEvi2rEKwEP7mNbXgtXvNUk2B3dWA9v",
+        "links": { "website": "https://www.stonkfun.xyz/" },
+        "market": {
+          "priceUsd": 0.009068804309871364,
+          "marketCapUsd": 9068804.309871366,
+          "fdvUsd": 9068804.309871366,
+          "volume24hUsd": 328801.6840138954,
+          "liquidityUsd": 257967.6507464629,
+          "priceChange24h": 210.98879485484647,
+          "peakMarketCapUsd": 12102754.254480641
+        },
+        "status": "graduated",
+        "graduationProgress": 1,
+        "graduatedAt": "2026-09-11T13:08:47.586Z",
+        "createdAt": "2026-09-11T13:10:06.816Z"
+      },
+      {
+        "mint": "4xSfWrG9VkyNbnCNvB6opKEex2ebXmCZCiied84fZisB",
+        "pool": "5XiLuB4LGu6t1G4Y9Eay8FEgarEg491NnL4TiqVgKEkV",
+        "name": "Solana Maximalist Corp",
+        "symbol": "MAXI",
+        "quote": {
+          "mint": "Xs2yquAgsHByNzx68WJC55WHjHBvG9JsMB7CWjTLyPy",
+          "symbol": "DFDV",
+          "name": "DFDV",
+          "logoUrl": "/api/asset/quote-logo/Xs2yquAgsHByNzx68WJC55WHjHBvG9JsMB7CWjTLyPy?v=79969f6c",
+          "category": "xstock",
+          "categoryLabel": "xStock"
+        },
+        "launchpad": "launchlab",
+        "mode": "reward",
+        "quoteOnlyFees": true,
+        "transferFee": { "bps": 300 },
+        "imageUrl": "https://gateway.irys.xyz/AVvb7U3bqQxrujSKFAGPFVKFxdCGLLP2n4Jx3UgX19EY",
+        "links": {
+          "website": "https://www.solanamaxi.xyz/",
+          "twitter": "https://x.com/SolanaMaxiDAT"
+        },
+        "market": {
+          "priceUsd": 0.0014741172094171113,
+          "marketCapUsd": 1474117.2094171112,
+          "fdvUsd": 1474117.2094171112,
+          "volume24hUsd": 24564.210310026734,
+          "liquidityUsd": 46167.12119504672,
+          "priceChange24h": -15.831379708024562,
+          "peakMarketCapUsd": 7157941.665437211
+        },
+        "status": "graduated",
+        "graduationProgress": 1,
+        "graduatedAt": "2026-09-08T20:56:31.397Z",
+        "createdAt": "2026-09-08T20:56:17.469Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "pageSize": 2,
+      "total": 10987,
+      "totalPages": 5494
+    },
+    "network": "mainnet-beta"
+  },
+  "meta": { "generatedAt": "2026-09-12T20:34:36.556Z" }
+}

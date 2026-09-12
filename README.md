@@ -8,14 +8,33 @@ Built for the [Stocklana hackathon](https://hackathons.solana.com/hackathons/sto
 
 ## Status
 
-Day 0. Nothing runs yet. See `docs/PRD.md` for the full spec and `docs/CHECKPOINT.md` for where the build is.
+Scaffolded 2026-09-12. Stock DRIP is the headline feature; the ledger is the proof layer. See `docs/PRD.md` (v0.5) for the spec and `docs/CHECKPOINT.md` for where the build is.
 
 ## Quick start
 
+Requires Node 22+ and pnpm.
+
 ```bash
 pnpm install
-cp .env.example .env   # fill in HELIUS_API_KEY and DATABASE_URL
-pnpm dev
+cp .env.example .env   # fill in DATABASE_URL (Neon) and HELIUS_API_KEY
+pnpm db:push           # create tables
+pnpm seed              # fill `coins` from the StonkFun API (add --decimals to fill quote decimals)
+pnpm dev               # http://localhost:3000, health at /api/health
+```
+
+Workers run separately (one Railway service each):
+
+```bash
+pnpm worker:indexer
+pnpm worker:rate-cacher
+pnpm worker:drip-keeper
+```
+
+Checks:
+
+```bash
+pnpm typecheck && pnpm lint && pnpm test && pnpm build
+pnpm test -- tests/stonkfun.test.ts   # one file
 ```
 
 ## What it does
@@ -27,7 +46,7 @@ pnpm dev
 
 ## Stack
 
-Next.js 15, TypeScript, Tailwind, shadcn/ui, `@solana/kit`, Postgres (Neon) via Drizzle, Helius, Jupiter, grammY.
+Next.js 16, TypeScript, Tailwind 4, shadcn/ui, `@solana/kit` 7 with `@solana/react`, Postgres (Neon) via Drizzle, Helius, Jupiter. Workers are plain TypeScript run with `tsx`.
 
 ## Security
 
