@@ -6,7 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Stonk Ledger: a Stocklana hackathon entry (Solana Foundation, deadline 2026-09-18). Paste a wallet, see every tokenized-stock payout it earned from StonkFun reward coins with a proof link per transaction, and turn any payout stream into a stock position with one approval (Stock DRIP).
 
-**Current state:** docs only. No package.json, no source code yet. Read `docs/CHECKPOINT.md` first in every session; it holds the day-by-day status and blockers. `docs/PRD.md` v0.4 is the spec. `.superstack/idea-context.md` is the handoff from the idea phase (key mints, stack hints, competitors).
+**Positioning (decided 2026-09-12):** Stock DRIP is the headline feature. The ledger is the plumbing DRIP needs and the proof that each run happened. Lead every pitch, README, and page with DRIP. Scoring is in `.superstack/entry-scoring.md`.
+
+**Current state:** docs only. No package.json, no source code yet. Read `docs/CHECKPOINT.md` first in every session; it holds the day-by-day status and blockers. `docs/PRD.md` v0.5 is the spec. `.superstack/idea-context.md` is the handoff from the idea phase (key mints, stack hints, competitors).
 
 ## Commands (planned, per README)
 
@@ -56,6 +58,7 @@ Key mints (from `.superstack/idea-context.md`): KNOTS `8RVBk8vxLiUHueLUW1f4izFVq
 - Show "Other {quote} received" separately from classified payouts so nothing looks hidden.
 - Prices older than the first snapshot use nearest daily close and are labelled "estimated" (`usd_estimated`).
 - Non-goals: no compounding back into the meme coin (link to Slawth), no APR leaderboard, no charts or trading, no subscription.
+- Cut from the submission: eligibility badge, calculator, Telegram bot. Do not build them before Sep 18. Portfolio view waits until Day 5.
 - Brand direction: brokerage statement, not casino. Do not reuse StonkFun green.
 
 ## Working rules for this repo

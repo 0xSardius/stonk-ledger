@@ -1,18 +1,18 @@
 # Checkpoint — Stonk Ledger
 
-**Last updated:** 2026-09-11
-**Phase:** Build, Day 0 (Stocklana hackathon, deadline 2026-09-18)
-**Spec:** `docs/PRD.md` v0.4. Handoff: `.superstack/idea-context.md`.
+**Last updated:** 2026-09-12
+**Phase:** Build, Day 0 tasks in progress on Day 1 (Stocklana hackathon, deadline 2026-09-18)
+**Spec:** `docs/PRD.md` v0.5 (DRIP-first). Entry decision: `.superstack/entry-scoring.md`. Handoff: `.superstack/idea-context.md`.
 **Research repo:** `../stonkfun-product-ideas` (private; idea reports, red-team, protocol facts)
 
 ## Where things are
-- Folder created 2026-09-11. Docs copied from the research repo. No code yet.
-- Git not initialized yet (owner is setting up the remote first).
+- 2026-09-12: decided the entry. Stock DRIP is the headline, the ledger is the proof layer. F4, F5, F6 cut. DRIP on Day 2, statement Day 3, portfolio Day 5. PRD bumped to v0.5. `CLAUDE.md` added.
+- Git initialized, remote `origin` set (github.com/0xSardius/stonk-ledger). No code yet; scaffold is next.
 - Keys not yet gathered: Helius, Neon `DATABASE_URL`, Telegram bot token, Jupiter referral account.
 
 ## Day 0 checklist (PRD section 12)
 1. Register on hackathons.solana.com.
-2. `git init`, first commit with `.gitignore` in place, confirm `.env` is ignored.
+2. ~~`git init`, first commit with `.gitignore` in place~~ done; confirm `.env` stays ignored.
 3. Get a Helius API key and a Neon database.
 4. `/session-start`, then `scaffold-project` (reads `.superstack/idea-context.md`).
 5. Seed the `coins` table from `GET /tokens?mode=reward` across all categories.

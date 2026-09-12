@@ -1,13 +1,15 @@
 # Stonk Ledger — Product Requirements Document
 
-**Version:** 0.4 (Stocklana hackathon edition)
-**Date:** 2026-09-11
+**Version:** 0.5 (Stocklana hackathon edition, DRIP-first)
+**Date:** 2026-09-12
 **Deadline:** Stocklana submissions close 2026-09-18
 **Status:** Build now. Seven days.
 **Owner:** 0xsardius
 **Name:** Stonk Ledger (formerly Knot Ledger, then Dividend Ledger)
 **One-liner:** The receipt and the reinvestment for meme coins that pay dividends in tokenized stocks. Paste a wallet, see every APPLx, STRCx, or SPYx payout it earned with a proof link per transaction, and turn any payout stream into a stock position with one approval.
 **Tagline:** Your memecoin pays you in Apple. We keep the receipts and buy you more.
+
+**What changed from v0.4 (2026-09-12):** Stock DRIP is the headline feature and the ledger is the proof layer. Decision after scoring both as hackathon entries: DRIP-led scores 15/18, ledger-led 11/18, combined 16/18 (see `.superstack/entry-scoring.md`). DRIP moves to Day 2, the statement page to Day 3. Eligibility (F4), calculator (F5), and Telegram (F6) are cut from the submission. Portfolio view is deferred to Day 5. Name unchanged.
 
 **What changed from v0.3:** the product is re-centered on the hackathon theme. KNOTS (pays STONK) becomes one coin among many; the lead coins pay holders in tokenized stocks. Stock DRIP, a non-custodial reinvestment of payouts into a chosen stock, moves from "later" to core because it is the novel primitive judges reward. Build plan is seven days to the deadline. Sections 2, 6, 12, and 13 are new.
 
@@ -49,8 +51,8 @@ Hundreds of thousands of wallets are accumulating tokenized stock through meme c
 ## 3. Goals and non-goals
 
 ### Goals by 2026-09-18
-1. Live mainnet demo: paste any wallet, see stock dividends with proof links.
-2. Stock DRIP working end to end for at least one coin on mainnet, with a revoke button.
+1. Stock DRIP working end to end for at least one coin on mainnet, with a revoke button and a run log with three signatures. This is the headline.
+2. Live mainnet demo: paste any wallet, see stock dividends with proof links, including every DRIP run.
 3. Public proof feed per coin and share cards.
 4. Generic across every reward coin from the first commit.
 5. Repo, README with setup, 3-minute pitch video, 5-minute technical video, submitted 24 hours before the deadline.
@@ -61,6 +63,7 @@ Hundreds of thousands of wallets are accumulating tokenized stock through meme c
 - No charts, limit orders, or trading.
 - No subscription. Owner rule.
 - No tax or investment advice. "Payouts" and "dividends received", never "yield" or "APR" in the UI.
+- Cut for the submission (2026-09-12): eligibility badge (F4), calculator (F5), Telegram digest (F6). Revisit after Sep 18.
 
 ## 4. Users and jobs
 
@@ -89,7 +92,7 @@ Hundreds of thousands of wallets are accumulating tokenized stock through meme c
 
 ## 6. Feature specification
 
-### F1. Dividend statement (core)
+### F1. Dividend statement (core, proof layer for F2)
 Route: `/[coin]/[wallet]`.
 - Headline: stock received from this coin, in shares and USD. "TREE has paid you 0.83 APPLx ($196)."
 - USD at receipt versus USD today, so the holder sees the stock leg separately from the payout count.
@@ -97,9 +100,9 @@ Route: `/[coin]/[wallet]`.
 - Every counted transaction with time, amount, USD at receipt, and a Solscan link.
 - "Other {quote} received" total shown separately so nothing looks hidden.
 - Current coin balance and value. Payouts as a percentage of current position, labelled as such.
-- Portfolio view at `/wallet/[address]`: all reward coins this wallet holds, stock received per coin, total stock dividends in USD.
+- Portfolio view at `/wallet/[address]`: all reward coins this wallet holds, stock received per coin, total stock dividends in USD. Deferred to Day 5.
 
-### F2. Stock DRIP (the primitive)
+### F2. Stock DRIP (the primitive, headline feature)
 - One approval: the holder approves a delegate on their quote-token account (SPL `approve` with a capped amount, or Token-2022 equivalent). No program deployment required. Same trust model Slawth uses, disclosed plainly.
 - Keeper runs every 10 minutes: when a wallet's un-swept payouts exceed a threshold (default $5), it transfers the delegated amount, swaps via Jupiter into the holder's chosen stock (default SPYx), and sends the stock back to the holder's wallet in the same flow.
 - Choices: keep the stock you are paid in (default for stock-paid coins), or convert to SPYx, QQQx, NVDAx, or any xStock. For coins paid in STONK or ZEC, the default target is SPYx.
@@ -111,13 +114,13 @@ Route: `/[coin]/[wallet]`.
 - Public feed per coin: latest distributions with verification links (the StonkBot pattern).
 - OG share card per wallet: headline stock amount, coin logo, truncated address, link to the latest proof.
 
-### F4. Eligibility and next payout
+### F4. Eligibility and next payout (cut 2026-09-12)
 - Balance versus the coin's stated minimum, with the source cited. Next payout estimate from the median interval over the last 24 hours.
 
-### F5. Honest calculator (stretch, day 5)
+### F5. Honest calculator (cut 2026-09-12)
 - Payouts per day at trailing volume, net of the 3% entry, 3% exit, and any compounding tax. Volume slider always on screen.
 
-### F6. Telegram digest (stretch, day 5)
+### F6. Telegram digest (cut 2026-09-12)
 - `/watch <wallet>`: daily digest of stock dividends received. Weekly card.
 
 ### F7. Generic coins (core)
@@ -201,13 +204,15 @@ watches(chat_id, wallet, coin_id, mode text, created_at, last_ping_at)
 | Day | Date | Deliverable | Done when |
 |---|---|---|---|
 | 0 | Sep 11 | Register on hackathons.solana.com. Repo, Next.js 15, Drizzle, Neon, Helius key, coins table seeded across all categories, `.env` gitignored | `/api/health` lists 300+ reward coins with quote categories |
-| 1 | Sep 12 | Distributor identified for TREE, DIVI, KNOTS; rate-cacher; indexer | `docs/RESEARCH.md` has evidence; 10 wallets indexed |
-| 2 | Sep 13 | Statement page, portfolio view, share card (F1, F3 cards) | Public URL; three cards posted with proof links |
-| 3 | Sep 14 | DRIP approval flow, keeper, revoke, run log (F2) | One mainnet DRIP run with three signatures on a test wallet |
-| 4 | Sep 15 | Proof feed, eligibility, 10 coins live from config (F3 feed, F4, F7) | Second and third coins render with no code change |
-| 5 | Sep 16 | Polish, calculator and Telegram if time, README and setup, security notes | A stranger can run it from the README |
+| 1 | Sep 12 | Distributor identified for TREE, DIVI, KNOTS; rate-cacher; indexer and classifier | `docs/RESEARCH.md` has evidence; 10 wallets indexed |
+| 2 | Sep 13 | DRIP approval flow, keeper, revoke, run log (F2) | One mainnet DRIP run with three signatures on a test wallet |
+| 3 | Sep 14 | Statement page with DRIP runs inline, share card (F1, F3 cards) | Public URL; three cards posted with proof links |
+| 4 | Sep 15 | Proof feed, second DRIP target, 10 coins live from config (F3 feed, F7) | Second and third coins render with no code change; second target swaps |
+| 5 | Sep 16 | Portfolio view, polish, README and setup, security notes, classifier and keeper tests | A stranger can run it from the README; both tests pass |
 | 6 | Sep 17 | Pitch video (3 min), technical video (5 min), submission text; submit | Submitted with all links |
 | 7 | Sep 18 | Buffer. Fix what judges would hit first. | Nothing left on the critical path |
+
+One of Sep 13 or Sep 14 goes to StonkFlow (see `docs/CHECKPOINT.md`). If Sep 13 is taken, Day 2 and Day 3 shift by one day and Day 5 absorbs the loss.
 
 Commit per working unit. Update `docs/CHECKPOINT.md` every session.
 
@@ -235,7 +240,7 @@ Commit per working unit. Update `docs/CHECKPOINT.md` every session.
 | Keeper security concerns from judges | capped delegation, three-signature logging, revoke path, disclosure; say it before they ask |
 | Jupiter fills poorly on thin xStock pools | route only to SPYx, QQQx, NVDAx, APPLx by default; show impact before approval |
 | Slawth ships stock targets before the deadline | our wedge remains the statement plus proof; DRIP into stocks is still first if shipped by Sep 18 |
-| Seven days is not enough | F5 and F6 are stretch; F1, F2, F3, F7 are the submission |
+| Seven days is not enough | F4, F5, F6 are cut; portfolio view deferred; F1, F2, F3, F7 are the submission |
 | Helius free tier | on-demand indexing, caching, upgrade if needed for the demo week |
 | Users read payouts as guaranteed | volume assumption on screen, no yield or APR wording |
 
@@ -244,7 +249,7 @@ Commit per working unit. Update `docs/CHECKPOINT.md` every session.
 2. Are coin minimums enforced on chain or by policy?
 3. Does Jupiter's current API support integrator fees on Token-2022 xStock outputs? Confirm before Day 3.
 4. Team: solo, or invite a second builder by username for the keeper?
-5. Final product name.
+5. Final product name. Resolved 2026-09-12: Stonk Ledger stays. The pitch leads with DRIP; the name does not change.
 
 ## 16. How to build this with Claude Code
 1. `/session-start`, then `scaffold-project` (reads `.superstack/idea-context.md`).
