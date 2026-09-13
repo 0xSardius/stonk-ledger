@@ -8,7 +8,7 @@ Stonk Ledger: a Stocklana hackathon entry (Solana Foundation, deadline 2026-09-1
 
 **Positioning (decided 2026-09-12):** Stock DRIP is the headline feature. The ledger is the plumbing DRIP needs and the proof that each run happened. Lead every pitch, README, and page with DRIP. Scoring is in `.superstack/entry-scoring.md`.
 
-**Current state:** scaffolded 2026-09-12. Pages, schema, seed script, health route, and worker stubs exist. No indexer, classifier, or keeper logic yet. Read `docs/CHECKPOINT.md` first in every session; it holds the day-by-day status and blockers. `docs/PRD.md` v0.5 is the spec. `.superstack/idea-context.md` and `.superstack/build-context.md` are the phase handoffs.
+**Current state (2026-09-13):** indexer, classifier, rate-cacher, and the full DRIP stack (approve page, API, keeper) are built and committed. The first live DRIP run needs the owner to fund the keeper and approve from a wallet that holds a reward coin. Statement page is next (Day 3). Read `docs/CHECKPOINT.md` first in every session; it holds the day-by-day status and blockers. `docs/PRD.md` v0.5 is the spec. `.superstack/idea-context.md` and `.superstack/build-context.md` are the phase handoffs.
 
 ## Commands
 
@@ -24,7 +24,11 @@ pnpm db:push             # push lib/db/schema.ts to DATABASE_URL (Neon)
 pnpm db:generate         # write SQL migrations to ./drizzle
 pnpm db:studio
 pnpm seed                # upsert coins from StonkFun; --pages=N, --decimals
+pnpm index-wallet <addr> [--pages=N]      # index one wallet now
+pnpm job snapshot-prices | snapshot-rewards | drip-once   # one-shot jobs
 pnpm worker:indexer | worker:rate-cacher | worker:drip-keeper
+pnpm tsx scripts/research/find-distributor.ts <coinMint>       # PRD 8.1
+pnpm tsx scripts/research/holder-distribution.ts <coinMint>    # payout percentiles
 pnpm ci                  # build + typecheck + lint + format:check + test
 ```
 
@@ -37,7 +41,10 @@ Next.js 16 App Router, React 19, TypeScript, Tailwind 4, shadcn/ui (base-nova st
 ## Layout
 
 - `app/` routes, route handlers under `app/api/`, client components under `app/components/`, client-side Solana helpers under `app/lib/`. The app is mainnet-only; there is no cluster switcher.
-- `lib/` server-only code: `lib/env.ts` (zod-validated env, import only server-side), `lib/db/` (Drizzle schema and lazy client), `lib/stonkfun/` (API client and pure mappers).
+- `lib/` server-only code: `lib/env.ts` (zod-validated env, import only server-side), `lib/db/` (Drizzle schema and lazy client), `lib/stonkfun/` (API client and pure mappers), `lib/helius/` (paced RPC + enhanced history), `lib/classify.ts` (pure payout classifier), `lib/jobs/` (index-wallet, snapshots), `lib/drip/` (targets, Ultra, keeper signer, sweep arithmetic, verify, run), `lib/prices/`.
+- The payout distributor is one platform wallet, `5KXDF6QnqhBj72hDtJNkkpFaQVUfbFXNybMsp3DiK6tD`, stored on every coin row. Evidence in `docs/RESEARCH.md`.
+- Helius free tier rate-limits. `HeliusClient` paces at 4 calls/s and retries on 429. Never run two Helius-heavy scripts at once.
+- A wallet can hold hundreds of mints. Intersect held mints with active coins in memory (`lib/jobs/held-coins.ts`), never with a giant SQL IN list.
 - `workers/` long-running loops sharing `workers/_loop.ts`.
 - `scripts/` one-shot CLIs run with `tsx`.
 - `tests/` Vitest, with mainnet fixtures under `tests/fixtures/`.

@@ -98,7 +98,11 @@ export class HeliusClient {
     return JSON.parse(text) as T;
   }
 
-  async rpc<T>(method: string, params: unknown[]): Promise<T> {
+  /** JSON-RPC. Standard methods take an array; DAS methods (getTokenAccounts, getAsset...) take an object. */
+  async rpc<T>(
+    method: string,
+    params: unknown[] | Record<string, unknown>
+  ): Promise<T> {
     const out = await this.json<{ result?: T; error?: { message: string } }>(
       this.rpcUrl,
       {

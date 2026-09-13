@@ -50,7 +50,56 @@ A distributor batch carries no coin id. When a wallet holds two coins that pay t
 | top TREE holder  | TREE  | 146     | 48.70 APPLx   | Sep 6 to Sep 13 |
 | top DIVI holder  | DIVI  | 14      | 529 STRCx     | Sep 11 to 13    |
 
+## Jupiter swap path for the DRIP keeper (verified live 2026-09-13)
+
+`GET https://lite-api.jup.ag/ultra/v1/order?inputMint=&outputMint=&amount=&taker=` answers without an API key. Test order: 1,000 STONK ($239) to SPYx, a Token-2022 mint.
+
+| Field          | Value                                                                                 |
+| -------------- | ------------------------------------------------------------------------------------- |
+| router         | dflow (aggregator mode)                                                               |
+| outAmount      | 0.3115 SPYx                                                                           |
+| priceImpactPct | 0.21%                                                                                 |
+| slippageBps    | 500 (Ultra default)                                                                   |
+| Jupiter fee    | 10 bps, taken in the input mint                                                       |
+| response       | unsigned `transaction` (base64) plus `requestId`; sign, then `POST /ultra/v1/execute` |
+
+Decisions:
+
+1. The keeper uses Ultra order -> sign -> execute. Jupiter submits the transaction; no RPC send path needed.
+2. PRD open question 3 (integrator fees on Token-2022 outputs) is moot. The keeper receives the swap output in its own account and forwards 99% to the holder, keeping the 1% DRIP fee in the output stock. No Jupiter referral account is needed. `JUPITER_REFERRAL_ACCOUNT` stays optional for manual de-risk swaps later.
+3. Show `priceImpactPct` and `outUsdValue` from a dry-run order on the approval screen.
+4. Ultra rate limit is 50 requests per 10 s with no execute volume, enough for a 10-minute keeper.
+
+## Who is paid enough to care (2026-09-13)
+
+Script: `scripts/research/holder-distribution.ts`. Uniform random sample of 60 holders with balance > 0 (Helius DAS `getTokenAccounts`), one page (100 transactions) of quote-account history each, payouts summed over the trailing 7 days. Holders with no payout count as zero.
+
+|                                    | TREE / APPLx | KNOTS / STONK |
+| ---------------------------------- | ------------ | ------------- |
+| Holders with balance > 0           | 2,805        | 14,345        |
+| Got at least one payout in 7 days  | 65%          | 45%           |
+| p25                                | $0.00        | $0.00         |
+| Median                             | $4.67        | $0.00         |
+| p75                                | $20.72       | $13.09        |
+| p90                                | $135.75      | $149.19       |
+| p99                                | $1,094.51    | $708.47       |
+| Mean                               | $54.73       | $41.66        |
+| Share earned by top 10% of holders | 78%          | 75%           |
+
+Prices at sample time: APPLx $330.90, STONK $0.2454.
+
+Reading:
+
+- The median KNOTS holder is below the coin's $20 minimum and receives nothing. The median TREE holder gets about one $5 sweep a week.
+- The product's customer is the top quartile of holders: roughly $20 to $1,000 of stock per week, arriving as dust. That is about 700 TREE wallets and 3,500 KNOTS wallets today, before counting the other 3,500 coins.
+- The $5 default threshold is right for the median TREE holder and triggers daily from p75 upward.
+- Caveat: one history page per wallet undercounts whales with more than 100 quote-account transactions a week, so p99 is a floor, not a ceiling.
+- Pitch sizing: say "the holders who matter", top-quartile wallets, not "238k positions".
+
+## Known limitation: two coins, one quote mint
+
+When a wallet holds two coins paid in the same quote (the KNOTS whale also holds DEX, paid in STONK), DRIP delegations are per (wallet, quote mint) and the keeper only sweeps payouts attributed to the chosen coin. The status page shows both coins as candidates. Fine for the demo; merge candidates by quote mint after the hackathon.
+
 ## Not yet answered
 
-- Median payout per holder over 7 days (the "who is paid enough to care" gate). Needs the indexer on a random holder sample, not the top 5.
 - Whether coin minimums are enforced on chain (PRD open question 2).

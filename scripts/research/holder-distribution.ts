@@ -54,9 +54,11 @@ async function main() {
   const owners = new Map<string, number>();
   let cursor: string | undefined;
   for (let page = 0; page < 30; page++) {
-    const r = await helius.rpc<DasResp>("getTokenAccounts", [
-      { mint: coinMint, limit: 1000, ...(cursor ? { cursor } : {}) },
-    ]);
+    const r = await helius.rpc<DasResp>("getTokenAccounts", {
+      mint: coinMint,
+      limit: 1000,
+      ...(cursor ? { cursor } : {}),
+    });
     for (const t of r.token_accounts) {
       if (t.amount > 0)
         owners.set(t.owner, (owners.get(t.owner) ?? 0) + t.amount);

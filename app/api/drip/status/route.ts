@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { and, eq, gte, inArray, isNull, sql } from "drizzle-orm";
 import { db, schema } from "@/lib/db";
 import { HeliusClient } from "@/lib/helius/client";
+import { heldActiveCoins } from "@/lib/jobs/held-coins";
 import { keeperSigner } from "@/lib/drip/keeper";
 import { DRIP_TARGETS, DEFAULT_THRESHOLD_USD } from "@/lib/drip/targets";
 
@@ -22,19 +23,7 @@ export async function GET(req: Request) {
   const keeper = (await keeperSigner()).address;
 
   const holdings = await helius.tokenAccounts(wallet);
-  const heldMints = holdings.map((h) => h.mint);
-  const coins =
-    heldMints.length === 0
-      ? []
-      : await d
-          .select()
-          .from(schema.coins)
-          .where(
-            and(
-              eq(schema.coins.active, true),
-              inArray(schema.coins.mint, heldMints)
-            )
-          );
+  const coins = await heldActiveCoins(holdings.map((h) => h.mint));
 
   const since = new Date(Date.now() - 7 * 86400_000);
   const payouts7d =

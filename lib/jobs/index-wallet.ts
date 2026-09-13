@@ -11,6 +11,7 @@
  * AMBIGUITY_RATIO of the top one. Documented in docs/RESEARCH.md.
  */
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { heldActiveCoins } from "./held-coins";
 import { db, schema } from "../db";
 import { classifyTx } from "../classify";
 import { HeliusClient } from "../helius/client";
@@ -50,19 +51,7 @@ export async function indexWallet(
 
   // 1. holdings -> which reward coins this wallet holds
   const holdings = await helius.tokenAccounts(wallet);
-  const heldMints = holdings.map((h) => h.mint);
-  const coins: Coin[] =
-    heldMints.length === 0
-      ? []
-      : await d
-          .select()
-          .from(schema.coins)
-          .where(
-            and(
-              eq(schema.coins.active, true),
-              inArray(schema.coins.mint, heldMints)
-            )
-          );
+  const coins: Coin[] = await heldActiveCoins(holdings.map((h) => h.mint));
 
   const summary: IndexSummary = {
     wallet,
