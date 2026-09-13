@@ -90,21 +90,29 @@ export const rewardSnapshots = pgTable(
   (t) => [primaryKey({ columns: [t.coinId, t.ts] })]
 );
 
-export const dripDelegations = pgTable("drip_delegations", {
-  wallet: text("wallet").primaryKey(),
-  coinId: integer("coin_id")
-    .notNull()
-    .references(() => coins.id),
-  quoteMint: text("quote_mint").notNull(),
-  targetMint: text("target_mint").notNull(),
-  capRaw: bigint("cap_raw", { mode: "bigint" }).notNull(),
-  approvedSig: text("approved_sig"),
-  revokedSig: text("revoked_sig"),
-  thresholdUsd: numeric("threshold_usd").notNull().default("5"),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
+export const dripDelegations = pgTable(
+  "drip_delegations",
+  {
+    wallet: text("wallet").notNull(),
+    coinId: integer("coin_id")
+      .notNull()
+      .references(() => coins.id),
+    quoteMint: text("quote_mint").notNull(),
+    /** Token program that owns the quote mint: SPL Token or Token-2022. */
+    quoteProgram: text("quote_program").notNull(),
+    /** Holder's quote token account that carries the delegation. */
+    quoteTokenAccount: text("quote_token_account").notNull(),
+    targetMint: text("target_mint").notNull(),
+    capRaw: bigint("cap_raw", { mode: "bigint" }).notNull(),
+    approvedSig: text("approved_sig"),
+    revokedSig: text("revoked_sig"),
+    thresholdUsd: numeric("threshold_usd").notNull().default("5"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.wallet, t.quoteMint] })]
+);
 
 export const dripRuns = pgTable("drip_runs", {
   id: serial("id").primaryKey(),

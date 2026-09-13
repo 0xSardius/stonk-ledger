@@ -179,7 +179,7 @@ wallets(address pk, first_seen, last_indexed_sig, last_indexed_at)
 payouts(sig pk, coin_id, wallet, amount_raw bigint, amount numeric, block_time, usd_at_receipt numeric, usd_estimated bool, probable bool)
 price_snapshots(mint, ts, usd numeric)
 reward_snapshots(coin_id, ts, distributed_tokens numeric, payout_count int, holder_count int)
-drip_delegations(wallet pk, coin_id, quote_mint, target_mint, cap_raw bigint, approved_sig, revoked_sig, threshold_usd numeric, created_at)
+drip_delegations(wallet, quote_mint, pk(wallet, quote_mint), coin_id, quote_program, quote_token_account, target_mint, cap_raw bigint, approved_sig, revoked_sig, threshold_usd numeric, created_at)
 drip_runs(id pk, wallet, coin_id, in_amount, out_mint, out_amount, fee_amount, transfer_sig, swap_sig, return_sig, ts)
 watches(chat_id, wallet, coin_id, mode text, created_at, last_ping_at)
 ```
@@ -264,7 +264,7 @@ Commit per working unit. Update `docs/CHECKPOINT.md` every session.
 
 1. ~~Distributor: one platform wallet for all coins, or per coin?~~ Resolved 2026-09-13: one platform wallet, `5KXDF6QnqhBj72hDtJNkkpFaQVUfbFXNybMsp3DiK6tD`. Evidence in `docs/RESEARCH.md`.
 2. Are coin minimums enforced on chain or by policy?
-3. Does Jupiter's current API support integrator fees on Token-2022 xStock outputs? Confirm before Day 3.
+3. ~~Does Jupiter's current API support integrator fees on Token-2022 xStock outputs?~~ Moot, 2026-09-13: the keeper takes the 1% fee from the swap output itself. Ultra routes STONK to SPYx (Token-2022) at 0.2% impact. See `docs/RESEARCH.md`.
 4. Team: solo, or invite a second builder by username for the keeper?
 5. Final product name. Resolved 2026-09-12: Stonk Ledger stays. The pitch leads with DRIP; the name does not change.
 
