@@ -3,6 +3,7 @@
  *
  *   pnpm job snapshot-prices
  *   pnpm job snapshot-rewards [limit]
+ *   pnpm job drip-once            # one keeper pass over every active delegation
  */
 const [jobName, ...rest] = process.argv.slice(2);
 
@@ -17,6 +18,26 @@ async function main() {
     case "snapshot-rewards": {
       const { snapshotRewards } = await import("../lib/jobs/snapshot-rewards");
       console.log("snapshots", await snapshotRewards(Number(rest[0] ?? 20)));
+      return;
+    }
+    case "drip-once": {
+      const { isNull } = await import("drizzle-orm");
+      const { db, schema } = await import("../lib/db");
+      const { runDelegation } = await import("../lib/drip/run");
+      const active = await db()
+        .select()
+        .from(schema.dripDelegations)
+        .where(isNull(schema.dripDelegations.revokedSig));
+      console.log(`${active.length} active delegations`);
+      for (const del of active) {
+        const r = await runDelegation(del);
+        console.log(
+          del.wallet.slice(0, 8),
+          JSON.stringify(r, (_k, v) =>
+            typeof v === "bigint" ? v.toString() : v
+          )
+        );
+      }
       return;
     }
     default:
