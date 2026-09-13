@@ -17,7 +17,8 @@
     "worker:indexer": "tsx workers/indexer.ts",
     "worker:rate-cacher": "tsx workers/rate-cacher.ts",
     "worker:drip-keeper": "tsx workers/drip-keeper.ts",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "job": "tsx scripts/job.ts"
   },
   "description": "The receipt and the reinvestment for meme coins that pay dividends in tokenized stocks.",
   "keywords": [
