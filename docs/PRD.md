@@ -227,7 +227,7 @@ watches(chat_id, wallet, coin_id, mode text, created_at, last_ping_at)
 | 6   | Sep 17 | Pitch video (3 min), technical video (5 min), submission text; submit                                                                       | Submitted with all links                                               |
 | 7   | Sep 18 | Buffer. Fix what judges would hit first.                                                                                                    | Nothing left on the critical path                                      |
 
-One of Sep 13 or Sep 14 goes to StonkFlow (see `docs/CHECKPOINT.md`). If Sep 13 is taken, Day 2 and Day 3 shift by one day and Day 5 absorbs the loss.
+No day goes to StonkFlow (decided 2026-09-13). The owner has Turbin3 coursework in parallel, so owner-side steps are batched.
 
 Commit per working unit. Update `docs/CHECKPOINT.md` every session.
 

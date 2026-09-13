@@ -26,9 +26,8 @@
 
 Identify the on-chain distributor signer for TREE, DIVI, and KNOTS (PRD section 8.1). Public RPCs rate-limit anonymous calls; use Helius. Record evidence in `docs/RESEARCH.md`.
 
-## Sequencing with StonkFlow (decided 2026-09-11)
-
-The owner's other entry, StonkFlow (`../../agents/stonkflow`, AnsemHack Clawrena, token live by Sep 20), gets one day (Sep 13 or 14) for deploy, first live launch, and the ClawPump token. Stonk Ledger gets every other build day through Sep 17. After Sep 18, shift to StonkFlow onboarding. A StonkFlow flagship reward coin should be one of the demo coins here.
+## Sequencing (revised 2026-09-13)
+No StonkFlow day. Every build day through Sep 17 goes to Stonk Ledger. The owner also has Turbin3 assignments, so owner-side tasks (fund the keeper, approve DRIP from a holder wallet, record videos) are batched and kept short. Build order: distributor webhook and keeper test (Day 2 tail), statement page and share card (Day 3), proof feed and ten coins (Day 4), portfolio, brand, README, deploy (Day 5), videos and submit (Day 6).
 
 ## Rules that apply throughout
 
