@@ -37,6 +37,19 @@ Every other fee payer in the sample is a swap: sources JUPITER, BYREAL, OKX_DEX_
 2. PRD open question 1 ("one platform wallet or per coin?") is resolved: one platform wallet.
 3. Step 5 of PRD 8.1 (daily transfer count versus `payoutCount` growth) will be checked by the indexer once it runs for 24 hours.
 
+## Coin attribution when quote mints collide
+
+A distributor batch carries no coin id. When a wallet holds two coins that pay the same quote (two STONK-paid coins), the indexer attributes the payout to the coin where the wallet's position is worth the most (balance x market cap / 1B supply), and marks it `probable` only when the runner-up position is worth at least 20% of the top one. First observed on the largest KNOTS holder, who also holds dust of another STONK-paid coin. Exact attribution would require matching batch co-recipients against holder sets and is deferred.
+
+## Live indexing results (2026-09-13, 3 pages of history each)
+
+| Wallet           | Coin  | Payouts | Amount        | Window          |
+| ---------------- | ----- | ------- | ------------- | --------------- |
+| top KNOTS holder | KNOTS | 208     | 319,744 STONK | Sep 1 to Sep 13 |
+| same wallet      | TACZ  | 33      | 123 ZCAT      | Sep 12 to 13    |
+| top TREE holder  | TREE  | 146     | 48.70 APPLx   | Sep 6 to Sep 13 |
+| top DIVI holder  | DIVI  | 14      | 529 STRCx     | Sep 11 to 13    |
+
 ## Not yet answered
 
 - Median payout per holder over 7 days (the "who is paid enough to care" gate). Needs the indexer on a random holder sample, not the top 5.
