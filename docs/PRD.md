@@ -262,7 +262,7 @@ Commit per working unit. Update `docs/CHECKPOINT.md` every session.
 
 ## 15. Open questions
 
-1. Distributor: one platform wallet for all coins, or per coin?
+1. ~~Distributor: one platform wallet for all coins, or per coin?~~ Resolved 2026-09-13: one platform wallet, `5KXDF6QnqhBj72hDtJNkkpFaQVUfbFXNybMsp3DiK6tD`. Evidence in `docs/RESEARCH.md`.
 2. Are coin minimums enforced on chain or by policy?
 3. Does Jupiter's current API support integrator fees on Token-2022 xStock outputs? Confirm before Day 3.
 4. Team: solo, or invite a second builder by username for the keeper?

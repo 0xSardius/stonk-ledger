@@ -87,3 +87,13 @@ Key mints (from `.superstack/idea-context.md`): KNOTS `8RVBk8vxLiUHueLUW1f4izFVq
 - Distributor research evidence goes in `docs/RESEARCH.md` (PRD 8.1 procedure).
 - Submission requires: public MIT repo, README with five-minute setup, seed script, one integration test for the classifier and one for the keeper against a mainnet fixture.
 - Skill order the PRD prescribes: `scaffold-project`, `solana-dev`, `brand-design`, `frontend-design-guidelines`, `build-with-claude`, `railway-docs`, `submit-to-hackathon`.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
