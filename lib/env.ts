@@ -8,6 +8,7 @@ import { z } from "zod";
 const schema = z.object({
   DATABASE_URL: z.url().optional(),
   HELIUS_API_KEY: z.string().min(1).optional(),
+  HELIUS_WEBHOOK_SECRET: z.string().min(16).optional(),
   TELEGRAM_BOT_TOKEN: z.string().optional(),
   JUPITER_REFERRAL_ACCOUNT: z.string().optional(),
   DRIP_KEEPER_SECRET_KEY: z.string().optional(),

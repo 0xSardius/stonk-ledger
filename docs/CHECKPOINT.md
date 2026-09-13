@@ -27,6 +27,7 @@
 Identify the on-chain distributor signer for TREE, DIVI, and KNOTS (PRD section 8.1). Public RPCs rate-limit anonymous calls; use Helius. Record evidence in `docs/RESEARCH.md`.
 
 ## Sequencing (revised 2026-09-13)
+
 No StonkFlow day. Every build day through Sep 17 goes to Stonk Ledger. The owner also has Turbin3 assignments, so owner-side tasks (fund the keeper, approve DRIP from a holder wallet, record videos) are batched and kept short. Build order: distributor webhook and keeper test (Day 2 tail), statement page and share card (Day 3), proof feed and ten coins (Day 4), portfolio, brand, README, deploy (Day 5), videos and submit (Day 6).
 
 ## Rules that apply throughout

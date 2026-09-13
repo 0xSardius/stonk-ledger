@@ -27,6 +27,7 @@ pnpm seed                # upsert coins from StonkFun; --pages=N, --decimals
 pnpm index-wallet <addr> [--pages=N]      # index one wallet now
 pnpm job snapshot-prices | snapshot-rewards | drip-once   # one-shot jobs
 pnpm worker:indexer | worker:rate-cacher | worker:drip-keeper
+pnpm tsx scripts/register-webhook.ts <https://app-url> | --list   # Helius webhook on the distributor
 pnpm tsx scripts/research/find-distributor.ts <coinMint>       # PRD 8.1
 pnpm tsx scripts/research/holder-distribution.ts <coinMint>    # payout percentiles
 pnpm ci                  # build + typecheck + lint + format:check + test
@@ -44,6 +45,7 @@ Next.js 16 App Router, React 19, TypeScript, Tailwind 4, shadcn/ui (base-nova st
 - `lib/` server-only code: `lib/env.ts` (zod-validated env, import only server-side), `lib/db/` (Drizzle schema and lazy client), `lib/stonkfun/` (API client and pure mappers), `lib/helius/` (paced RPC + enhanced history), `lib/classify.ts` (pure payout classifier), `lib/jobs/` (index-wallet, snapshots), `lib/drip/` (targets, Ultra, keeper signer, sweep arithmetic, verify, run), `lib/prices/`.
 - The payout distributor is one platform wallet, `5KXDF6QnqhBj72hDtJNkkpFaQVUfbFXNybMsp3DiK6tD`, stored on every coin row. Evidence in `docs/RESEARCH.md`.
 - Helius free tier rate-limits. `HeliusClient` paces at 4 calls/s and retries on 429. Never run two Helius-heavy scripts at once.
+- Fresh payouts arrive through the Helius webhook on the distributor address, not by polling. History walks are only for backfill on first view. `payouts` is keyed by (sig, wallet) because one batch pays many wallets.
 - A wallet can hold hundreds of mints. Intersect held mints with active coins in memory (`lib/jobs/held-coins.ts`), never with a giant SQL IN list.
 - `workers/` long-running loops sharing `workers/_loop.ts`.
 - `scripts/` one-shot CLIs run with `tsx`.

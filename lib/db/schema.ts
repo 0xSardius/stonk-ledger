@@ -48,11 +48,12 @@ export const wallets = pgTable("wallets", {
 export const payouts = pgTable(
   "payouts",
   {
-    sig: text("sig").primaryKey(),
-    coinId: integer("coin_id")
-      .notNull()
-      .references(() => coins.id),
+    /** Transaction signature. One distributor batch pays many wallets, so the key is (sig, wallet). */
+    sig: text("sig").notNull(),
     wallet: text("wallet").notNull(),
+    /** Null until the batch is attributed to a coin (two coins can share a quote mint). */
+    coinId: integer("coin_id").references(() => coins.id),
+    quoteMint: text("quote_mint").notNull(),
     amountRaw: bigint("amount_raw", { mode: "bigint" }).notNull(),
     amount: numeric("amount").notNull(),
     blockTime: timestamp("block_time", { withTimezone: true }).notNull(),
@@ -61,8 +62,10 @@ export const payouts = pgTable(
     probable: boolean("probable").notNull().default(false),
   },
   (t) => [
+    primaryKey({ columns: [t.sig, t.wallet] }),
     index("payouts_wallet_coin_idx").on(t.wallet, t.coinId),
     index("payouts_coin_time_idx").on(t.coinId, t.blockTime),
+    index("payouts_quote_time_idx").on(t.quoteMint, t.blockTime),
   ]
 );
 

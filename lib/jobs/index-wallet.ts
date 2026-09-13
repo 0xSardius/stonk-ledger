@@ -132,6 +132,7 @@ export async function indexWallet(
           rows.push({
             sig: r.payout.sig,
             coinId: target.id,
+            quoteMint,
             wallet,
             amountRaw: r.payout.amountRaw ?? 0n,
             amount: r.payout.amountUi.toString(),
@@ -152,6 +153,17 @@ export async function indexWallet(
         .filter((r) => inserted.some((i) => i.sig === r.sig))
         .reduce((a, r) => a + Number(r.amount), 0);
     }
+    // batches ingested by the webhook before this wallet was known
+    await d
+      .update(schema.payouts)
+      .set({ coinId: target.id, probable: ambiguous })
+      .where(
+        and(
+          eq(schema.payouts.wallet, wallet),
+          eq(schema.payouts.quoteMint, quoteMint),
+          sql`${schema.payouts.coinId} is null`
+        )
+      );
     summary.coins.push(entry);
     summary.newPayouts += entry.newPayouts;
   }
@@ -172,7 +184,7 @@ export async function indexWallet(
  * Older payouts stay null until a daily-close backfill exists (PRD 8.3),
  * and are then labelled "estimated".
  */
-async function attachUsdAtReceipt(
+export async function attachUsdAtReceipt(
   rows: (typeof schema.payouts.$inferInsert)[],
   quoteMint: string
 ) {

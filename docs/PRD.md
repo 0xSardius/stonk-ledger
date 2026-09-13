@@ -176,7 +176,7 @@ Store stock and coin prices every 60 s from Day 0. Earlier payouts use the neare
 ```
 coins(id, symbol, mint, quote_mint, quote_symbol, quote_decimals, quote_category, fee_bps, distributor_signers text[], min_rule text, min_source text, active bool)
 wallets(address pk, first_seen, last_indexed_sig, last_indexed_at)
-payouts(sig pk, coin_id, wallet, amount_raw bigint, amount numeric, block_time, usd_at_receipt numeric, usd_estimated bool, probable bool)
+payouts(sig, wallet, pk(sig, wallet), coin_id nullable, quote_mint, amount_raw bigint, amount numeric, block_time, usd_at_receipt numeric, usd_estimated bool, probable bool)
 price_snapshots(mint, ts, usd numeric)
 reward_snapshots(coin_id, ts, distributed_tokens numeric, payout_count int, holder_count int)
 drip_delegations(wallet, quote_mint, pk(wallet, quote_mint), coin_id, quote_program, quote_token_account, target_mint, cap_raw bigint, approved_sig, revoked_sig, threshold_usd numeric, created_at)
