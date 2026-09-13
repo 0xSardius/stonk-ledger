@@ -1,0 +1,32 @@
+{
+  "6GmAFSYs4gk3FDao5FzzySQpPZaWsa4rUJHacpMpUNgx": {
+    "createdAt": "2026-07-23T19:06:56Z",
+    "liquidity": 6304232.331633197,
+    "usdPrice": 0.24109250138760613,
+    "blockId": 446773752,
+    "decimals": 9,
+    "priceChange24h": -6.38827426984929
+  },
+  "XsbEhLAtcf6HdfpFZ5xEMdqW8nfAvcsP5bdudRLJzJp": {
+    "createdAt": "2025-06-10T11:06:56Z",
+    "liquidity": 811745.6395299657,
+    "usdPrice": 331.4419222996809,
+    "blockId": 446773753,
+    "decimals": 8,
+    "priceChange24h": -0.596010871710372,
+    "stockData": {
+      "id": "xstocks",
+      "price": 332.58,
+      "mcap": 4849208188600,
+      "updatedAt": "2026-09-13T18:40:52.761Z"
+    },
+    "scaledUiConfig": {
+      "multiplier": 1.0026642075893797,
+      "newMultiplier": 1.0032690125398187,
+      "newMultiplierEffectiveAt": "2026-08-08T00:30:00Z",
+      "circSupplyPrescaled": 153763.60213513,
+      "totalSupplyPrescaled": 153763.60213513,
+      "usdPricePrescaled": 332.5254100999002
+    }
+  }
+}

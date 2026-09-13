@@ -1,10 +1,21 @@
 import { runLoop } from "./_loop";
+import { snapshotQuotePrices } from "../lib/jobs/snapshot-prices";
+import { snapshotRewards } from "../lib/jobs/snapshot-rewards";
 
 /**
- * Rate cacher: stock prices via Jupiter Price and coin prices via StonkFun
- * every 60 s into `price_snapshots`; reward totals hourly into
- * `reward_snapshots`. See docs/PRD.md section 8.3. Filled in on Day 1.
+ * Rate cacher (PRD 8.3):
+ *  - every 60 s: USD price of every quote mint via Jupiter Price v3
+ *  - every 60 min: reward totals for the top 20 coins via StonkFun
  */
+const HOUR = 60 * 60 * 1000;
+let lastRewards = 0;
+
 runLoop("rate-cacher", 60_000, async () => {
-  console.log("[rate-cacher] tick: not implemented yet");
+  const priced = await snapshotQuotePrices();
+  console.log(`[rate-cacher] priced ${priced} quote mints`);
+  if (Date.now() - lastRewards > HOUR) {
+    lastRewards = Date.now();
+    const n = await snapshotRewards(20);
+    console.log(`[rate-cacher] reward snapshots for ${n} coins`);
+  }
 });
