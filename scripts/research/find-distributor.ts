@@ -223,9 +223,6 @@ async function main() {
     for (const pr of smp.programs) e.programs.add(pr);
     byPayer.set(smp.feePayer, e);
   }
-  for (const smp of samples) {
-    // sources are per tx; attach via a second pass keyed on sig
-  }
   const payerBreakdown = Array.from(byPayer.entries())
     .sort((a, b) => b[1].n - a[1].n)
     .map(([payer, e]) => ({
