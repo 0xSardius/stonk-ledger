@@ -6,6 +6,10 @@ Paste a wallet, see every APPLx, STRCx, or SPYx payout it earned with a proof li
 
 Built for the [Stocklana hackathon](https://hackathons.solana.com/hackathons/stocklana). Submissions close 2026-09-18.
 
+## Live
+
+**https://stonk-ledger.vercel.app** · statement: `/wallet/<address>` · DRIP: `/drip` · share card: `/api/og/<address>` · JSON: `/api/wallet/<address>`
+
 ## Status
 
 Scaffolded 2026-09-12. Stock DRIP is the headline feature; the ledger is the proof layer. See `docs/PRD.md` (v0.5) for the spec and `docs/CHECKPOINT.md` for where the build is.
@@ -21,6 +25,8 @@ pnpm db:push           # create tables
 pnpm seed              # fill `coins` from the StonkFun API (add --decimals to fill quote decimals)
 pnpm dev               # http://localhost:3000, health at /api/health
 ```
+
+Deploy: the app is on Vercel (repo connected, pushes to `main` deploy). Production env needs `DATABASE_URL`, `HELIUS_API_KEY`, `HELIUS_WEBHOOK_SECRET`, `DRIP_KEEPER_SECRET_KEY`, `NEXT_PUBLIC_APP_URL`. After the first deploy, register the payout webhook once: `pnpm tsx scripts/register-webhook.ts https://<app>`.
 
 Workers run separately (one Railway service each):
 

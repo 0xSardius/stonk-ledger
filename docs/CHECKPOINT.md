@@ -1,7 +1,7 @@
 # Checkpoint — Stonk Ledger
 
 **Last updated:** 2026-09-14
-**Phase:** Build, Day 2 complete (first mainnet DRIP run done), Day 3 starting (Stocklana hackathon, deadline 2026-09-18)
+**Phase:** Build, Day 3 mostly done: statement, share card, live on Vercel, webhook live (Stocklana hackathon, deadline 2026-09-18)
 **Spec:** `docs/PRD.md` v0.5 (DRIP-first). Entry decision: `.superstack/entry-scoring.md`. Handoff: `.superstack/idea-context.md`.
 **Research repo:** `../stonkfun-product-ideas` (private; idea reports, red-team, protocol facts)
 
