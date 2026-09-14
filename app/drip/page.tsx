@@ -9,6 +9,7 @@ import * as t22 from "@solana-program/token-2022";
 import { toast } from "sonner";
 import { useAppClient } from "../lib/client-provider";
 import { useSend } from "../lib/hooks/use-send";
+import { sendViaWallet } from "../lib/send-via-wallet";
 import { txUrl, ellipsify } from "../lib/explorer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -129,7 +130,7 @@ export default function DripPage() {
       decimals: selected.quoteDecimals,
     });
     const sig = await run(
-      () => client.sendTransaction(ix),
+      () => sendViaWallet(client, signer, [ix]),
       "Stock DRIP approved"
     );
     if (!sig) return;
@@ -169,7 +170,7 @@ export default function DripPage() {
       owner: signer,
     });
     const sig = await run(
-      () => client.sendTransaction(ix),
+      () => sendViaWallet(client, signer, [ix]),
       "Delegation revoked"
     );
     if (!sig) return;

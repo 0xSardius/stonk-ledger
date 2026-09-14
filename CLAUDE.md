@@ -89,6 +89,13 @@ Key mints (from `.superstack/idea-context.md`): KNOTS `8RVBk8vxLiUHueLUW1f4izFVq
 - Cut from the submission: eligibility badge, calculator, Telegram bot. Do not build them before Sep 18. Portfolio view waits until Day 5.
 - Brand direction: brokerage statement, not casino. Do not reuse StonkFun green.
 
+## Skills to load
+
+- **`solana-dev`** before any wallet, signing, transaction, token-program, or `@solana/kit` work. It carries the current kit patterns, the Token-2022 notes, and the Solana MCP server for live docs. Do not write kit or wallet-standard code from memory.
+- **`integrating-jupiter`** before touching the Ultra order or execute calls.
+- **`frontend-design-guidelines`** and **`number-formatting`** while building any page. **`brand-design`** once, before the statement page.
+- **`railway-docs`** for the worker deploys. **`submit-to-hackathon`** on Day 6.
+
 ## Working rules for this repo
 
 - Commit one working, tested unit at a time. Update `docs/CHECKPOINT.md` at the end of every session.
