@@ -5,6 +5,7 @@ import { HeliusClient } from "@/lib/helius/client";
 import { heldActiveCoins } from "@/lib/jobs/held-coins";
 import { keeperSigner } from "@/lib/drip/keeper";
 import { DRIP_TARGETS, DEFAULT_THRESHOLD_USD } from "@/lib/drip/targets";
+import { displaySymbol } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -74,7 +75,7 @@ export async function GET(req: Request) {
           ? Number(coinHolding.amountRaw) / 10 ** coinHolding.decimals
           : 0,
         quoteMint: c.quoteMint,
-        quoteSymbol: c.quoteSymbol,
+        quoteSymbol: displaySymbol(c.quoteSymbol, c.quoteCategory),
         quoteDecimals: qa.decimals,
         quoteProgram: qa.program,
         quoteTokenAccount: qa.tokenAccount,

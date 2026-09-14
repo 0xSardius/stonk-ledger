@@ -275,3 +275,15 @@ export function fmtDate(d: Date) {
 export function fmtDateTime(d: Date) {
   return `${dateFmt.format(d)} ${timeFmt.format(d)} UTC`;
 }
+
+/** StonkFun reports xStock symbols as "APPLX"; the issuer writes "APPLx". */
+export function displaySymbol(symbol: string, quoteCategory?: string | null) {
+  if (
+    (quoteCategory === "xstock" || quoteCategory === "backpack") &&
+    /X$/.test(symbol) &&
+    symbol.length > 1
+  ) {
+    return symbol.slice(0, -1) + "x";
+  }
+  return symbol;
+}

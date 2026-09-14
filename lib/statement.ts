@@ -11,6 +11,7 @@ import { indexWallet } from "./jobs/index-wallet";
 import { JupiterPriceClient, currentMultiplier } from "./prices/jupiter";
 import { findTarget } from "./drip/targets";
 import { heldActiveCoins } from "./jobs/held-coins";
+import { displaySymbol } from "./format";
 
 const STALE_MS = 10 * 60_000;
 const ROWS_PER_COIN = 60;
@@ -219,7 +220,7 @@ export async function getStatement(
       name: c.name,
       imageUrl: c.imageUrl,
       mint: c.mint,
-      quoteSymbol: c.quoteSymbol,
+      quoteSymbol: displaySymbol(c.quoteSymbol, c.quoteCategory),
       quoteMint: c.quoteMint,
       quoteCategory: c.quoteCategory,
       isStock:
@@ -277,7 +278,10 @@ export async function getStatement(
   const runs: DripRunRow[] = runRows.map((r) => ({
     id: r.id,
     coinSymbol: coinById.get(r.coinId)?.symbol ?? "?",
-    quoteSymbol: coinById.get(r.coinId)?.quoteSymbol ?? "?",
+    quoteSymbol: displaySymbol(
+      coinById.get(r.coinId)?.quoteSymbol ?? "?",
+      coinById.get(r.coinId)?.quoteCategory
+    ),
     targetSymbol: findTarget(r.outMint)?.symbol ?? "?",
     inAmount: Number(r.inAmount),
     outAmount: r.outAmount != null ? Number(r.outAmount) : null,
