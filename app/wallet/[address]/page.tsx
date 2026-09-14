@@ -256,9 +256,7 @@ function CoinSection({ c }: { c: CoinStatement }) {
           />{" "}
           {c.quoteSymbol}
           {sharePrice != null && (
-            <span className="text-muted-foreground">
-              {" "}
-              ·{" "}
+            <span className="block text-xs text-muted-foreground">
               <Num
                 value={t.amount24h * c.multiplier * sharePrice}
                 type="fiat_value"
@@ -302,9 +300,8 @@ function CoinSection({ c }: { c: CoinStatement }) {
               />{" "}
               {c.symbol}
               {c.position.usd != null && (
-                <span className="text-muted-foreground">
-                  {" "}
-                  · <Num value={c.position.usd} type="fiat_value" />
+                <span className="block text-xs text-muted-foreground">
+                  <Num value={c.position.usd} type="fiat_value" />
                 </span>
               )}
             </>
@@ -438,7 +435,7 @@ function Stat({
   return (
     <div>
       <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="mt-0.5 whitespace-nowrap">{children}</dd>
+      <dd className="mt-0.5 leading-snug">{children}</dd>
     </div>
   );
 }
