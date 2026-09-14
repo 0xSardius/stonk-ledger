@@ -6,11 +6,16 @@ import { systemProgram } from "@solana-program/system";
 
 /**
  * Stonk Ledger is mainnet-only. Reward coins, xStocks, and payouts exist only
- * there. The RPC URL comes from NEXT_PUBLIC_RPC_URL so the browser can use a
- * provisioned endpoint without a key in the bundle.
+ * there. In the browser, HTTP RPC goes through /api/rpc, which adds the
+ * Helius key server-side; the public mainnet RPC refuses sendTransaction.
+ * NEXT_PUBLIC_RPC_URL overrides that (for a keyless provider of your own).
  */
-export const RPC_URL =
-  process.env.NEXT_PUBLIC_RPC_URL ?? "https://api.mainnet-beta.solana.com";
+function defaultRpcUrl() {
+  if (process.env.NEXT_PUBLIC_RPC_URL) return process.env.NEXT_PUBLIC_RPC_URL;
+  if (typeof window !== "undefined") return `${window.location.origin}/api/rpc`;
+  return "https://api.mainnet-beta.solana.com";
+}
+export const RPC_URL = defaultRpcUrl();
 export const RPC_WS_URL =
   process.env.NEXT_PUBLIC_RPC_WS_URL ?? "wss://api.mainnet-beta.solana.com";
 
