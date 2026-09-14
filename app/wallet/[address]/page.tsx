@@ -332,6 +332,12 @@ function CoinSection({ c }: { c: CoinStatement }) {
             Turn these {c.quoteSymbol} payouts into the stock you want →
           </Link>
         )}
+        <Link
+          href={`/coin/${c.mint}`}
+          className="text-primary underline underline-offset-2"
+        >
+          {c.symbol} proof feed
+        </Link>
         {c.stockUsd != null && (
           <span className="text-xs text-muted-foreground">
             {c.quoteSymbol} tracks a share at{" "}

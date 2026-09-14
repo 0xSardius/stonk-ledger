@@ -1,0 +1,226 @@
+/**
+ * Proof feed per coin (PRD F3): the latest distributor batches for a coin,
+ * each with a Solscan link, plus the coin's totals. Reads the database only;
+ * batches arrive through the Helius webhook.
+ */
+import { and, desc, eq, gte, inArray, sql } from "drizzle-orm";
+import { db, schema } from "./db";
+import { displaySymbol } from "./format";
+import { JupiterPriceClient, currentMultiplier } from "./prices/jupiter";
+
+export type Batch = {
+  sig: string;
+  blockTime: Date;
+  recipients: number;
+  amount: number;
+  usdAtReceipt: number | null;
+};
+
+export type CoinFeed = {
+  coin: {
+    id: number;
+    symbol: string;
+    name: string | null;
+    mint: string;
+    imageUrl: string | null;
+    quoteSymbol: string;
+    quoteMint: string;
+    quoteCategory: string;
+    feeBps: number | null;
+    marketCapUsd: number | null;
+    volume24hUsd: number | null;
+    distributorSigners: string[];
+  };
+  quoteUsd: number | null;
+  multiplier: number;
+  totals: {
+    batches: number;
+    payouts: number;
+    amount: number;
+    firstSeen: Date | null;
+    lastSeen: Date | null;
+    batches24h: number;
+    amount24h: number;
+    recipients24h: number;
+  };
+  snapshot: {
+    distributedTokens: number | null;
+    payoutCount: number | null;
+    holderCount: number | null;
+    ts: Date;
+  } | null;
+  batches: Batch[];
+};
+
+export async function getCoinFeed(
+  mint: string,
+  limit = 50
+): Promise<CoinFeed | null> {
+  const d = db();
+  const [c] = await d
+    .select()
+    .from(schema.coins)
+    .where(eq(schema.coins.mint, mint))
+    .limit(1);
+  if (!c) return null;
+
+  const since24h = new Date(Date.now() - 86400_000);
+  const [agg] = await d
+    .select({
+      batches: sql<number>`count(distinct ${schema.payouts.sig})::int`,
+      payouts: sql<number>`count(*)::int`,
+      amount: sql<string>`coalesce(sum(${schema.payouts.amount}),0)::text`,
+      first: sql<Date | null>`min(${schema.payouts.blockTime})`,
+      last: sql<Date | null>`max(${schema.payouts.blockTime})`,
+    })
+    .from(schema.payouts)
+    .where(eq(schema.payouts.coinId, c.id));
+  const [agg24] = await d
+    .select({
+      batches: sql<number>`count(distinct ${schema.payouts.sig})::int`,
+      amount: sql<string>`coalesce(sum(${schema.payouts.amount}),0)::text`,
+      recipients: sql<number>`count(distinct ${schema.payouts.wallet})::int`,
+    })
+    .from(schema.payouts)
+    .where(
+      and(
+        eq(schema.payouts.coinId, c.id),
+        gte(schema.payouts.blockTime, since24h)
+      )
+    );
+
+  const batches = await d
+    .select({
+      sig: schema.payouts.sig,
+      blockTime: sql<Date>`min(${schema.payouts.blockTime})`,
+      recipients: sql<number>`count(*)::int`,
+      amount: sql<string>`sum(${schema.payouts.amount})::text`,
+      usd: sql<string | null>`sum(${schema.payouts.usdAtReceipt})::text`,
+    })
+    .from(schema.payouts)
+    .where(eq(schema.payouts.coinId, c.id))
+    .groupBy(schema.payouts.sig)
+    .orderBy(desc(sql`min(${schema.payouts.blockTime})`))
+    .limit(limit);
+
+  const [snap] = await d
+    .select()
+    .from(schema.rewardSnapshots)
+    .where(eq(schema.rewardSnapshots.coinId, c.id))
+    .orderBy(desc(schema.rewardSnapshots.ts))
+    .limit(1);
+
+  let quoteUsd: number | null = null;
+  let multiplier = 1;
+  try {
+    const p = (await new JupiterPriceClient().prices([c.quoteMint]))[
+      c.quoteMint
+    ];
+    if (p) {
+      quoteUsd = p.usdPrice;
+      multiplier = currentMultiplier(p);
+    }
+  } catch {
+    /* price stays null */
+  }
+
+  return {
+    coin: {
+      id: c.id,
+      symbol: c.symbol,
+      name: c.name,
+      mint: c.mint,
+      imageUrl: c.imageUrl,
+      quoteSymbol: displaySymbol(c.quoteSymbol, c.quoteCategory),
+      quoteMint: c.quoteMint,
+      quoteCategory: c.quoteCategory,
+      feeBps: c.feeBps,
+      marketCapUsd: c.marketCapUsd != null ? Number(c.marketCapUsd) : null,
+      volume24hUsd: c.volume24hUsd != null ? Number(c.volume24hUsd) : null,
+      distributorSigners: c.distributorSigners,
+    },
+    quoteUsd,
+    multiplier,
+    totals: {
+      batches: agg.batches,
+      payouts: agg.payouts,
+      amount: Number(agg.amount),
+      firstSeen: agg.first ? new Date(agg.first) : null,
+      lastSeen: agg.last ? new Date(agg.last) : null,
+      batches24h: agg24.batches,
+      amount24h: Number(agg24.amount),
+      recipients24h: agg24.recipients,
+    },
+    snapshot: snap
+      ? {
+          distributedTokens:
+            snap.distributedTokens != null
+              ? Number(snap.distributedTokens)
+              : null,
+          payoutCount: snap.payoutCount,
+          holderCount: snap.holderCount,
+          ts: snap.ts,
+        }
+      : null,
+    batches: batches.map((b) => ({
+      sig: b.sig,
+      blockTime: new Date(b.blockTime),
+      recipients: b.recipients,
+      amount: Number(b.amount),
+      usdAtReceipt: b.usd != null ? Number(b.usd) : null,
+    })),
+  };
+}
+
+export type CoinListRow = {
+  mint: string;
+  symbol: string;
+  name: string | null;
+  quoteSymbol: string;
+  quoteCategory: string;
+  marketCapUsd: number | null;
+  volume24hUsd: number | null;
+  payoutsStored: number;
+  lastPayout: Date | null;
+};
+
+export const STOCK_CATEGORIES = ["xstock", "backpack", "prestock"] as const;
+
+/** Active coins by 24h volume with how many payouts we hold for each. */
+export async function listCoins(
+  limit = 40,
+  categories?: readonly string[]
+): Promise<CoinListRow[]> {
+  const d = db();
+  const rows = await d
+    .select({
+      mint: schema.coins.mint,
+      symbol: schema.coins.symbol,
+      name: schema.coins.name,
+      quoteSymbol: schema.coins.quoteSymbol,
+      quoteCategory: schema.coins.quoteCategory,
+      marketCapUsd: schema.coins.marketCapUsd,
+      volume24hUsd: schema.coins.volume24hUsd,
+      payoutsStored: sql<number>`(select count(*)::int from payouts p where p.coin_id = ${schema.coins.id})`,
+      lastPayout: sql<Date | null>`(select max(block_time) from payouts p where p.coin_id = ${schema.coins.id})`,
+    })
+    .from(schema.coins)
+    .where(
+      categories
+        ? and(
+            eq(schema.coins.active, true),
+            inArray(schema.coins.quoteCategory, [...categories])
+          )
+        : eq(schema.coins.active, true)
+    )
+    .orderBy(desc(sql`${schema.coins.volume24hUsd}::numeric`))
+    .limit(limit);
+  return rows.map((r) => ({
+    ...r,
+    symbol: r.symbol.trim() || `${r.mint.slice(0, 4)}…${r.mint.slice(-4)}`,
+    quoteSymbol: displaySymbol(r.quoteSymbol, r.quoteCategory),
+    marketCapUsd: r.marketCapUsd != null ? Number(r.marketCapUsd) : null,
+    volume24hUsd: r.volume24hUsd != null ? Number(r.volume24hUsd) : null,
+    lastPayout: r.lastPayout ? new Date(r.lastPayout) : null,
+  }));
+}

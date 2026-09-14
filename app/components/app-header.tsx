@@ -14,6 +14,12 @@ export function AppHeader() {
       </Link>
       <nav className="flex items-center gap-4 text-sm">
         <Link
+          href="/coins"
+          className="underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        >
+          Coins
+        </Link>
+        <Link
           href="/drip"
           className="underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         >
