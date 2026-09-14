@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { ThemeToggle } from "./theme-toggle";
 import { WalletButton } from "./wallet-button";
 
 export function AppHeader() {
@@ -11,7 +10,6 @@ export function AppHeader() {
         Stonk Ledger
       </Link>
       <div className="flex items-center gap-3">
-        <ThemeToggle />
         <WalletButton />
       </div>
     </header>
