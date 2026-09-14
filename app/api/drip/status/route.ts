@@ -3,7 +3,8 @@ import { and, eq, gte, inArray, isNull, sql } from "drizzle-orm";
 import { db, schema } from "@/lib/db";
 import { HeliusClient } from "@/lib/helius/client";
 import { heldActiveCoins } from "@/lib/jobs/held-coins";
-import { keeperSigner } from "@/lib/drip/keeper";
+import { keeperConnection, keeperSigner } from "@/lib/drip/keeper";
+import { readTokenAccount } from "@/lib/drip/verify";
 import { DRIP_TARGETS, DEFAULT_THRESHOLD_USD } from "@/lib/drip/targets";
 import { displaySymbol } from "@/lib/format";
 
@@ -12,16 +13,19 @@ export const dynamic = "force-dynamic";
 /**
  * GET /api/drip/status?wallet=<address>
  * What a wallet can DRIP: every reward coin it holds whose quote token account
- * exists, with balance, 7-day payouts, and any active delegation.
+ * exists, with balance, 7-day payouts, and any active delegation including
+ * the cap still delegated on chain.
  */
 export async function GET(req: Request) {
   const wallet = new URL(req.url).searchParams.get("wallet")?.trim();
-  if (!wallet)
+  if (!wallet) {
     return NextResponse.json({ error: "wallet required" }, { status: 400 });
+  }
 
   const d = db();
   const helius = new HeliusClient();
   const keeper = (await keeperSigner()).address;
+  const { rpc } = keeperConnection();
 
   const holdings = await helius.tokenAccounts(wallet);
   const coins = await heldActiveCoins(holdings.map((h) => h.mint));
@@ -60,40 +64,54 @@ export async function GET(req: Request) {
       )
     );
 
-  const candidates = coins.flatMap((c) => {
+  const candidates = [];
+  for (const c of coins) {
     const qa = holdings.find((h) => h.mint === c.quoteMint);
-    if (!qa) return [];
+    if (!qa) continue;
     const coinHolding = holdings.find((h) => h.mint === c.mint);
     const del = delegations.find((x) => x.quoteMint === c.quoteMint) ?? null;
-    return [
-      {
-        coinId: c.id,
-        symbol: c.symbol,
-        name: c.name,
-        imageUrl: c.imageUrl,
-        coinBalance: coinHolding
-          ? Number(coinHolding.amountRaw) / 10 ** coinHolding.decimals
-          : 0,
-        quoteMint: c.quoteMint,
-        quoteSymbol: displaySymbol(c.quoteSymbol, c.quoteCategory),
-        quoteDecimals: qa.decimals,
-        quoteProgram: qa.program,
-        quoteTokenAccount: qa.tokenAccount,
-        quoteBalanceRaw: qa.amountRaw.toString(),
-        payouts7d: p7.get(c.id)?.amount ?? "0",
-        payouts7dCount: p7.get(c.id)?.n ?? 0,
-        delegation: del
-          ? {
-              targetMint: del.targetMint,
-              capRaw: del.capRaw.toString(),
-              thresholdUsd: del.thresholdUsd,
-              approvedSig: del.approvedSig,
-              createdAt: del.createdAt,
-            }
-          : null,
-      },
-    ];
-  });
+    let delegatedRemainingRaw: string | null = null;
+    if (del) {
+      try {
+        const st = await readTokenAccount(
+          rpc,
+          del.quoteTokenAccount,
+          del.quoteProgram
+        );
+        delegatedRemainingRaw =
+          st.delegate === keeper ? st.delegatedAmountRaw.toString() : "0";
+      } catch {
+        delegatedRemainingRaw = null;
+      }
+    }
+    candidates.push({
+      coinId: c.id,
+      symbol: c.symbol,
+      name: c.name,
+      imageUrl: c.imageUrl,
+      coinBalance: coinHolding
+        ? Number(coinHolding.amountRaw) / 10 ** coinHolding.decimals
+        : 0,
+      quoteMint: c.quoteMint,
+      quoteSymbol: displaySymbol(c.quoteSymbol, c.quoteCategory),
+      quoteDecimals: qa.decimals,
+      quoteProgram: qa.program,
+      quoteTokenAccount: qa.tokenAccount,
+      quoteBalanceRaw: qa.amountRaw.toString(),
+      payouts7d: p7.get(c.id)?.amount ?? "0",
+      payouts7dCount: p7.get(c.id)?.n ?? 0,
+      delegation: del
+        ? {
+            targetMint: del.targetMint,
+            capRaw: del.capRaw.toString(),
+            delegatedRemainingRaw,
+            thresholdUsd: del.thresholdUsd,
+            approvedSig: del.approvedSig,
+            createdAt: del.createdAt,
+          }
+        : null,
+    });
+  }
 
   return NextResponse.json({
     wallet,

@@ -35,6 +35,7 @@ type Candidate = {
   delegation: {
     targetMint: string;
     capRaw: string;
+    delegatedRemainingRaw: string | null;
     thresholdUsd: string;
     approvedSig: string | null;
     createdAt: string;
@@ -276,14 +277,37 @@ export default function DripPage() {
                       </>
                     )}
                   </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={isSending}
-                    onClick={() => revoke(c)}
-                  >
-                    Revoke
-                  </Button>
+                  {c.delegation.delegatedRemainingRaw != null && (
+                    <p className="text-xs tabular-nums">
+                      Cap remaining:{" "}
+                      {fmt(c.delegation.delegatedRemainingRaw, c.quoteDecimals)}{" "}
+                      {c.quoteSymbol}
+                      {Number(c.delegation.delegatedRemainingRaw) === 0 && (
+                        <span className="ml-2 text-destructive">
+                          spent, raise it to keep sweeping
+                        </span>
+                      )}
+                    </p>
+                  )}
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        setTargetChoice(c.delegation!.targetMint);
+                        choose(c);
+                      }}
+                    >
+                      Raise cap
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={isSending}
+                      onClick={() => revoke(c)}
+                    >
+                      Revoke
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <Button size="sm" onClick={() => choose(c)}>

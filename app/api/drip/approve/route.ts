@@ -80,7 +80,18 @@ export async function POST(req: Request) {
     .values(row)
     .onConflictDoUpdate({
       target: [schema.dripDelegations.wallet, schema.dripDelegations.quoteMint],
-      set: { ...row },
+      // re-approval (cap top-up or new target) keeps the original start, so
+      // payouts already pending are still swept
+      set: {
+        coinId: row.coinId,
+        quoteProgram: row.quoteProgram,
+        quoteTokenAccount: row.quoteTokenAccount,
+        targetMint: row.targetMint,
+        capRaw: row.capRaw,
+        approvedSig: row.approvedSig,
+        revokedSig: null,
+        thresholdUsd: row.thresholdUsd,
+      },
     });
   return NextResponse.json({
     ok: true,
