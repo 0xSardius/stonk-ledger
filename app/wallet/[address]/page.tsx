@@ -271,9 +271,7 @@ function CoinSection({ c }: { c: CoinStatement }) {
             tokenPriceUsd={sharePrice}
           />{" "}
           {c.quoteSymbol}
-          <span className="text-muted-foreground">
-            {" "}
-            ·{" "}
+          <span className="block text-xs text-muted-foreground">
             {sharePrice != null && (
               <>
                 <Num
