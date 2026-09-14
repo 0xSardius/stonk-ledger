@@ -1,0 +1,17 @@
+{
+  "requestId": "01a0a0fc-40dc-767f-9f29-7f5981b55e9c",
+  "inputMint": "6GmAFSYs4gk3FDao5FzzySQpPZaWsa4rUJHacpMpUNgx",
+  "outputMint": "XsoCS1TfEyfFhfvj8EtZ528L3CaKBDBRqRapnBbDF2W",
+  "inAmount": "121940426",
+  "outAmount": "3338",
+  "otherAmountThreshold": "3338",
+  "priceImpactPct": "0.00928014831921456",
+  "slippageBps": 0,
+  "feeBps": 10,
+  "inUsdValue": 0.025350357865381846,
+  "outUsdValue": 0.025585612946317757,
+  "router": "metis",
+  "swapType": "aggregator",
+  "mode": "ultra",
+  "transaction": null
+}

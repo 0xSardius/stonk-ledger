@@ -18,7 +18,8 @@ export type UltraOrder = {
   inAmount: string;
   outAmount: string;
   otherAmountThreshold: string;
-  priceImpactPct: number;
+  /** Jupiter returns this as a string on some routers. */
+  priceImpactPct: number | string;
   slippageBps: number;
   feeBps: number;
   inUsdValue?: number;
