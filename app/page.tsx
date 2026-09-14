@@ -73,7 +73,7 @@ export default function Home() {
         />
         <button
           type="submit"
-          className="h-11 border-2 border-foreground bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-[3px_3px_0_var(--foreground)] transition-transform hover:-translate-y-px focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:translate-x-px active:translate-y-px active:shadow-none motion-reduce:transition-none"
+          className="h-11 whitespace-nowrap border-2 border-foreground bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-[3px_3px_0_var(--foreground)] transition-transform hover:-translate-y-px focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:translate-x-px active:translate-y-px active:shadow-none motion-reduce:transition-none"
         >
           Show my dividends
         </button>

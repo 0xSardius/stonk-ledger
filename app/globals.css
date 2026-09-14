@@ -41,9 +41,11 @@
   --sidebar-border: oklch(0.875 0.006 80);
   --sidebar-ring: oklch(0.44 0.16 25);
   --radius: 0.25rem;
-  --font-sans: var(--font-inter), system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
-  --font-serif: var(--font-instrument-serif), Georgia, serif;
+  --font-sans: var(--font-inter, Inter), system-ui, sans-serif;
+  --font-mono:
+    var(--font-jetbrains-mono, "JetBrains Mono"), ui-monospace, monospace;
+  --font-serif:
+    var(--font-instrument-serif, "Instrument Serif"), Georgia, serif;
 }
 
 .dark {
