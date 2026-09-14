@@ -49,3 +49,4 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .brand-preview/
+app/globals.css.bak

@@ -17,7 +17,25 @@ type Params = { params: Promise<{ address: string }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { address } = await params;
-  return { title: `Statement ${truncateAddress(address)} · Stonk Ledger` };
+  const title = `Statement ${truncateAddress(address)} · Stonk Ledger`;
+  const description =
+    "Every tokenized-stock payout this wallet received, with a proof link per transaction.";
+  const image = `/api/og/${address}`;
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [{ url: image, width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
+    },
+  };
 }
 
 export default async function WalletPage({ params }: Params) {

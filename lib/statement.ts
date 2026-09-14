@@ -97,7 +97,10 @@ export function isValidAddress(s: string) {
   }
 }
 
-export async function getStatement(wallet: string): Promise<Statement> {
+export async function getStatement(
+  wallet: string,
+  opts: { refresh?: boolean } = {}
+): Promise<Statement> {
   const d = db();
   const helius = new HeliusClient();
 
@@ -110,7 +113,7 @@ export async function getStatement(wallet: string): Promise<Statement> {
     .limit(1);
   const stale =
     !w?.lastIndexedAt || Date.now() - w.lastIndexedAt.getTime() > STALE_MS;
-  if (stale) {
+  if (stale && opts.refresh !== false) {
     try {
       await indexWallet(wallet, { helius, maxPages: w ? 1 : 3 });
     } catch (err) {
