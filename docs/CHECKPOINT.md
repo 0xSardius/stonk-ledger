@@ -1,37 +1,42 @@
 # Checkpoint — Stonk Ledger
 
-**Last updated:** 2026-09-14
-**Phase:** Build, Day 3 complete, Day 4 starting with the proof feed (Stocklana hackathon, deadline 2026-09-18)
-**Spec:** `docs/PRD.md` v0.5 (DRIP-first). Entry decision: `.superstack/entry-scoring.md`. Handoff: `.superstack/idea-context.md`.
+**Last updated:** 2026-09-14 (evening)
+**Phase:** Build. Days 0 to 4 complete, UX pass done. Remaining: owner mobile check, pitch video, technical video, submission (deadline 2026-09-18).
+**Spec:** `docs/PRD.md` v0.5 (DRIP-first). Entry decision: `.superstack/entry-scoring.md`. Handoff: `.superstack/idea-context.md`, `.superstack/build-context.md`.
 **Research repo:** `../stonkfun-product-ideas` (private; idea reports, red-team, protocol facts)
 
-## Where things are
+## Live and verified against production
 
-- 2026-09-12: decided the entry. Stock DRIP is the headline, the ledger is the proof layer. F4, F5, F6 cut. DRIP on Day 2, statement Day 3, portfolio Day 5. PRD bumped to v0.5. `CLAUDE.md` added.
-- Git initialized, remote `origin` set (github.com/0xSardius/stonk-ledger).
-- 2026-09-12 scaffold: `create-solana-dapp` kit/nextjs template (Next 16, @solana/kit 7), demo removed, mainnet-only. shadcn, Drizzle schema (PRD 8.4), Neon driver, `pnpm seed` (StonkFun, all categories), `/api/health`, worker stubs, Vitest with a live fixture. `pnpm ci` green. Handoff in `.superstack/build-context.md`.
-- 2026-09-13: Neon and Helius keys in `.env` (verified ignored, never committed). `pnpm db:push` applied. `pnpm seed --decimals` upserted 1,200 coins (300 per category) and filled decimals for 136 quote mints. `/api/health` returns ok with 1,200 coins. Day 0 done-when met.
-- Keys not yet gathered: Helius, Neon `DATABASE_URL`, Telegram bot token, Jupiter referral account.
+- **https://stonk-ledger.vercel.app** (Vercel project `0xsardius-projects/stonk-ledger`, GitHub repo connected, pushes to `main` deploy). Production env: `DATABASE_URL`, `HELIUS_API_KEY`, `HELIUS_WEBHOOK_SECRET`, `DRIP_KEEPER_SECRET_KEY`, `NEXT_PUBLIC_APP_URL`.
+- Routes verified 2026-09-14 by curl and by Chrome screenshots: `/`, `/wallet/[address]`, `/drip`, `/coins`, `/coin/[mint]` (top ten coins by volume render from config), `/api/og/[address]` (1200x630 PNG), `/api/wallet/[address]`, `/api/feed/[mint]`, `/api/health` (1,200 coins), `/api/rpc` (allow-listed relay), `/api/webhooks/helius` (403 without the secret).
+- **Helius webhook** registered on the distributor `5KXDF6QnqhBj72hDtJNkkpFaQVUfbFXNybMsp3DiK6tD`, active. Delivered 7,456 payout rows across 417 batches and 15 coins in its first 30 minutes.
+- **Workers on GitHub Actions**, one cron per workflow (`.github/workflows/prices.yml` every 5 min, `keeper.yml` every 10 min, `rewards.yml` hourly), repo secrets set. Manual dispatches succeed (`priced 136`, keeper pass evaluates delegations). **Not yet verified:** a run fired by the schedule itself. The combined workflow never fired on its own in 45 minutes; the split into three files was made at 18:15 UTC. Check `gh run list` next session; if still silent, the fallback is Vercel Cron on a paid plan or Railway.
+- **First mainnet Stock DRIP run** on the owner's test wallet `88tvtBFWdb814MGm2PoGXXDqpEvntpxEwC8ayhbbJoN`: 0.121940 STONK in, 0.00003401 SPYx returned, 0.00000034 SPYx fee. Signatures: transfer `63pXozKtz2PMRjt3wPNFeK6pZ9pxSydpiamyxh6zi3qT1paKCnkX4yXXNneoaWs2Dp8pD6TY2qvNHN7MR5H13RiF`, swap `4uRAYhtbjE8EiCKZV8b5Zs2qjQdMaKFazHeBeyUVdMtQBirBxvbiEq9YbYP2Ur74chKTXXMSpgUFbckX62pXE3SE`, return `4WLjeFx5BCH3aTfcRHqkTugzhqcbbCm5dKmLcX6ScHe4yV552QQM1bg6SCPH6xAFxTZQKnqjMF3NrZDHxi1FHmpN`. Approval tx `6aHSyKNi8MKtDT1pZyugPG3dprhzoYnKwgrfN2uKdWo8biTYuqPcMm9WX4mwWUoyeMo9KSw9oBQRGTcngnRYN2V`, cap 0.610353 STONK, 0.488 remaining. Test threshold on that row is $0.05; production default is $5.
+- Keeper public address `Hsmuc8GQADgdg6FrSUx9dFmR9HBEVRSDd3YNyTjyt5t3`, about 0.045 SOL. Secret in `.env`, Vercel env, and Actions secrets only.
 
-## Day 0 checklist (PRD section 12)
+## What exists (by day)
 
-1. Register on hackathons.solana.com.
-2. ~~`git init`, first commit with `.gitignore` in place~~ done; confirm `.env` stays ignored.
-3. ~~Get a Helius API key and a Neon database~~ done 2026-09-13.
-4. ~~`scaffold-project`~~ done 2026-09-12.
-5. ~~`pnpm db:push`, `pnpm seed --decimals`~~ done 2026-09-13.
-6. ~~`/api/health` lists 300+ reward coins~~ 1,200 coins, done 2026-09-13.
+- **Day 0 (Sep 11/12):** scaffold from `create-solana-dapp` kit/nextjs (Next 16, @solana/kit 7), mainnet only, shadcn, Drizzle + Neon, `pnpm seed` (1,200 coins, 136 quote mints with decimals), `/api/health`.
+- **Day 1 (Sep 13):** distributor identified, one platform wallet for all coins (`docs/RESEARCH.md`). Rate-cacher (Jupiter Price v3), Helius client, payout classifier with mainnet fixtures, indexer with value-weighted coin attribution. Holder distribution: TREE median $4.67/week, KNOTS median $0 (below its $20 minimum), top 10% earn 75 to 78%. Jupiter Ultra verified live; keeper takes the 1% fee from the output, no referral account.
+- **Day 2 (Sep 13/14):** DRIP schema per (wallet, quote mint), targets, Ultra client, keeper signer, sweep arithmetic, on-chain verify, `runDelegation` with refund path, API (`status`, `quote`, `approve`, `revoke`), `/drip` page, keeper worker, `pnpm job drip-once`. Distributor webhook with `payouts` re-keyed to (sig, wallet) and nullable `coin_id` plus `quote_mint`. First live run (above). Fixes from the live test: browser RPC relay `/api/rpc` (public RPC 403s on send), wallet signs and relay submits with polling (no websocket), next-themes removed.
+- **Day 3 (Sep 14):** brand pass (design-taste + brand-design): Ledger Ink, Instrument Serif + Inter + JetBrains Mono, `brand.md`. Statement page with the number-formatting spec (`lib/format.ts`), share card, first Vercel deploy, webhook registered, workers on Actions.
+- **Day 4 (Sep 14):** proof feed `/coin/[mint]`, `/coins` (stock-paid first), `/api/feed/[mint]`; DRIP cap top-up (remaining cap from chain, Raise cap keeps the sweep window); `tests/drip-run.test.ts` on mainnet fixtures; `docs/SECURITY.md`; README for a stranger. 36 tests pass.
+- **UX pass (Sep 14):** live-page review in Chrome against the design-taste checklist. Fixed: body font falling back to Times (font variables moved to `html`), stat row collision, estimated USD at receipt in lighter type where no price snapshot exists, headline scale on small screens, serif and explanatory `/drip`, bordered approval panel and approve button (`lib/ui.ts`), outline Connect Wallet. No strong anti-slop signals on any page. **Not verified at 375px** (Chrome resize did not take); CSS stacks to two columns and tables scroll.
 
-## Day 1 blocker
+## Remaining
 
-Identify the on-chain distributor signer for TREE, DIVI, and KNOTS (PRD section 8.1). Public RPCs rate-limit anonymous calls; use Helius. Record evidence in `docs/RESEARCH.md`.
+1. Owner: open the statement and `/drip` on a phone and report anything wrong.
+2. Confirm a scheduled Actions run fired (`gh run list --workflow=keeper.yml`).
+3. Second DRIP run happens on its own once pending payouts on the test wallet pass $0.05.
+4. Day 6: pitch video (3 min, product only, PRD 13), technical video (5 min: classifier evidence, keeper design, `docs/SECURITY.md`, webhook, schema), submission text, submit 24 hours early.
+5. After the hackathon: merge candidates by quote mint on `/drip`, daily-close backfill for USD at receipt, portfolio totals across coins on the statement header (partially there).
 
-## Sequencing (revised 2026-09-13)
+## Decisions and rules that apply throughout
 
-No StonkFlow day. Every build day through Sep 17 goes to Stonk Ledger. The owner also has Turbin3 assignments, so owner-side tasks (fund the keeper, approve DRIP from a holder wallet, record videos) are batched and kept short. Build order: distributor webhook and keeper test (Day 2 tail), statement page and share card (Day 3), proof feed and ten coins (Day 4), portfolio, brand, README, deploy (Day 5), videos and submit (Day 6).
-
-## Rules that apply throughout
-
-- Verify Jupiter and Helius parameter names from their docs before writing integration code.
-- Never print secrets. `.env` stays gitignored.
-- One working, tested unit per commit. Update this file at the end of every session.
+- No StonkFlow day; the owner also has Turbin3 coursework, so owner-side asks are batched and short.
+- DRIP is the headline; the ledger is the proof layer. Never use "yield" or "APR" in the UI.
+- Verify Jupiter and Helius parameter names from docs or live calls before writing integration code.
+- Never print secrets. `.env` stays gitignored and was never committed.
+- One working, tested unit per commit. Write files with the Write and Edit tools only; shell patches silently corrupted this file and one route during this build.
+- Helius free tier: pace at 4 calls/s, never run two Helius-heavy scripts at once. Local background loops get killed for memory; use one-shot jobs.
+- Update this file at the end of every session.
