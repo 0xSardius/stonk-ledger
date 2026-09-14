@@ -1,0 +1,31 @@
+# Stock DRIP keeper: one pass over every active delegation every 10 minutes (PRD F2).
+name: keeper
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: keeper
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      HELIUS_API_KEY: ${{ secrets.HELIUS_API_KEY }}
+      DRIP_KEEPER_SECRET_KEY: ${{ secrets.DRIP_KEEPER_SECRET_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm job drip-once
