@@ -28,7 +28,7 @@ pnpm dev               # http://localhost:3000, health at /api/health
 
 Deploy: the app is on Vercel (repo connected, pushes to `main` deploy). Production env needs `DATABASE_URL`, `HELIUS_API_KEY`, `HELIUS_WEBHOOK_SECRET`, `DRIP_KEEPER_SECRET_KEY`, `NEXT_PUBLIC_APP_URL`. After the first deploy, register the payout webhook once: `pnpm tsx scripts/register-webhook.ts https://<app>`.
 
-Workers run separately (one Railway service each):
+Workers run on a schedule in GitHub Actions (`.github/workflows/workers.yml`, secrets `DATABASE_URL`, `HELIUS_API_KEY`, `DRIP_KEEPER_SECRET_KEY`). For a long-running host instead, each of these is one service:
 
 ```bash
 pnpm worker:indexer

@@ -8,7 +8,7 @@ Stonk Ledger: a Stocklana hackathon entry (Solana Foundation, deadline 2026-09-1
 
 **Positioning (decided 2026-09-12):** Stock DRIP is the headline feature. The ledger is the plumbing DRIP needs and the proof that each run happened. Lead every pitch, README, and page with DRIP. Scoring is in `.superstack/entry-scoring.md`.
 
-**Current state (2026-09-13):** indexer, classifier, rate-cacher, and the full DRIP stack (approve page, API, keeper) are built and committed. The first live DRIP run needs the owner to fund the keeper and approve from a wallet that holds a reward coin. Statement page is next (Day 3). Read `docs/CHECKPOINT.md` first in every session; it holds the day-by-day status and blockers. `docs/PRD.md` v0.5 is the spec. `.superstack/idea-context.md` and `.superstack/build-context.md` are the phase handoffs.
+**Current state (2026-09-14):** live at https://stonk-ledger.vercel.app. Statement, share card, DRIP (one mainnet run done), Helius webhook on the distributor, workers on GitHub Actions. Brand applied per `brand.md`. Next: proof feed per coin, ten coins verified, videos and submission. Read `docs/CHECKPOINT.md` first in every session; it holds the day-by-day status and blockers. `docs/PRD.md` v0.5 is the spec. `.superstack/idea-context.md` and `.superstack/build-context.md` are the phase handoffs.
 
 ## Commands
 
@@ -37,7 +37,7 @@ pnpm ci                  # build + typecheck + lint + format:check + test
 
 ## Stack
 
-Next.js 16 App Router, React 19, TypeScript, Tailwind 4, shadcn/ui (base-nova style, components in `components/ui`), `@solana/kit` 7 with `@solana/react` and the kit wallet plugin (wallet-standard), Postgres on Neon via Drizzle (neon-http driver), Helius for RPC and enhanced transactions, Jupiter for swaps. Workers are plain TypeScript files under `workers/` started with `tsx`, one Railway service each. Node 22+.
+Next.js 16 App Router, React 19, TypeScript, Tailwind 4, shadcn/ui (base-nova style, components in `components/ui`), `@solana/kit` 7 with `@solana/react` and the kit wallet plugin (wallet-standard), Postgres on Neon via Drizzle (neon-http driver), Helius for RPC and enhanced transactions, Jupiter for swaps. Scheduled work runs as one-shot jobs (`pnpm job <name>`) from GitHub Actions; the `workers/` loops exist for a long-running host. Node 22+.
 
 ## Layout
 
