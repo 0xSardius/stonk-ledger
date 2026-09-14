@@ -179,8 +179,9 @@ export default async function WalletPage({ params }: Params) {
       <p className="mt-12 text-xs text-muted-foreground">
         Payouts are transfers signed by the StonkFun distributor. Amounts
         labelled probable were classified by batch shape rather than by signer.
-        USD at receipt uses the nearest recorded price; rows without one show no
-        value rather than a guess. Payouts depend on trading volume and are not
+        USD at receipt uses the price recorded within two hours of the payout;
+        where none was recorded, the value is estimated from today&apos;s price
+        and shown in lighter type. Payouts depend on trading volume and are not
         guaranteed.
       </p>
     </main>
@@ -199,7 +200,7 @@ function CoinSection({ c }: { c: CoinStatement }) {
           <span className="normal-case tracking-normal"> · {c.name}</span>
         ) : null}
       </p>
-      <h2 className="mt-2 font-serif text-5xl tracking-tight sm:text-6xl">
+      <h2 className="mt-2 font-serif text-4xl leading-none tracking-tight sm:text-6xl">
         <Num
           value={t.shares}
           type="token_amount"
@@ -207,7 +208,7 @@ function CoinSection({ c }: { c: CoinStatement }) {
           tokenPriceUsd={sharePrice}
           className="font-serif"
         />{" "}
-        <span className="text-2xl text-muted-foreground sm:text-3xl">
+        <span className="text-xl text-muted-foreground sm:text-3xl">
           {c.quoteSymbol}
         </span>
       </h2>
@@ -223,10 +224,10 @@ function CoinSection({ c }: { c: CoinStatement }) {
             at receipt
             {t.usdAtReceiptCoverage < 0.999 && (
               <span
-                title={`${Math.round(t.usdAtReceiptCoverage * 100)}% of payouts have a recorded price`}
+                title={`${Math.round(t.usdAtReceiptCoverage * 100)}% of payouts have a price recorded at the time; the rest are estimated from today's price`}
               >
                 {" "}
-                (partial)
+                (est.)
               </span>
             )}
             {" · "}
@@ -246,7 +247,7 @@ function CoinSection({ c }: { c: CoinStatement }) {
         payouts since {fmtDate(t.first)}
       </p>
 
-      <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-4 border-t border-border pt-4 text-sm sm:grid-cols-4">
+      <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-border pt-4 text-sm lg:grid-cols-4">
         <Stat label="Last 24 hours">
           <Num
             value={t.amount24h * c.multiplier}
@@ -254,6 +255,16 @@ function CoinSection({ c }: { c: CoinStatement }) {
             tokenPriceUsd={sharePrice}
           />{" "}
           {c.quoteSymbol}
+          {sharePrice != null && (
+            <span className="text-muted-foreground">
+              {" "}
+              ·{" "}
+              <Num
+                value={t.amount24h * c.multiplier * sharePrice}
+                type="fiat_value"
+              />
+            </span>
+          )}
         </Stat>
         <Stat label="Last 7 days">
           <Num
@@ -264,8 +275,17 @@ function CoinSection({ c }: { c: CoinStatement }) {
           {c.quoteSymbol}
           <span className="text-muted-foreground">
             {" "}
-            · <span className="font-mono tabular-nums">{t.count7d}</span>{" "}
-            payouts
+            ·{" "}
+            {sharePrice != null && (
+              <>
+                <Num
+                  value={t.amount7d * c.multiplier * sharePrice}
+                  type="fiat_value"
+                />{" "}
+                ·{" "}
+              </>
+            )}
+            <span className="font-mono tabular-nums">{t.count7d}</span> payouts
           </span>
         </Stat>
         <Stat label={`${c.symbol} position`}>
@@ -372,13 +392,23 @@ function CoinSection({ c }: { c: CoinStatement }) {
                   />{" "}
                   <span className="text-muted-foreground">{c.quoteSymbol}</span>
                 </td>
-                <td className="py-1.5 pr-3 text-right whitespace-nowrap text-muted-foreground">
+                <td
+                  className={
+                    p.usdEstimated
+                      ? "py-1.5 pr-3 text-right whitespace-nowrap text-muted-foreground/60"
+                      : "py-1.5 pr-3 text-right whitespace-nowrap text-muted-foreground"
+                  }
+                  title={
+                    p.usdEstimated
+                      ? "Estimated from today's price"
+                      : "Price recorded within two hours of the payout"
+                  }
+                >
                   <Num
                     value={p.usdAtReceipt}
                     type="fiat_value"
                     context="detailed"
                   />
-                  {p.usdEstimated && <span className="ml-1 text-xs">est.</span>}
                 </td>
                 <td className="py-1.5 text-right whitespace-nowrap">
                   <ProofLink sig={p.sig} label="proof" />

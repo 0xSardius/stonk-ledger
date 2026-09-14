@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { brutalButton, brutalPanel } from "@/lib/ui";
 
 const TOKEN_2022 = "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
 
@@ -190,20 +191,45 @@ export default function DripPage() {
   if (!wallet) {
     return (
       <main className="mx-auto max-w-4xl px-6 py-16">
-        <h1 className="text-3xl font-black tracking-tight">Stock DRIP</h1>
-        <p className="mt-3 max-w-xl text-muted-foreground">
-          Connect the wallet that holds a reward coin. You choose what its
-          payout stream becomes.
+        <p className="text-xs uppercase tracking-[0.08em] text-muted-foreground">
+          Stock DRIP
         </p>
+        <h1 className="mt-2 font-serif text-4xl tracking-tight sm:text-5xl">
+          Choose what your payouts become
+        </h1>
+        <p className="mt-3 max-w-xl text-sm text-muted-foreground">
+          Connect the wallet that holds a reward coin, top right. Then pick the
+          stock its payouts should turn into: SPYx, QQQx, NVDAx, APPLx, or any
+          xStock on the list.
+        </p>
+        <ul className="mt-6 max-w-xl space-y-2 border-t border-border pt-4 text-sm text-muted-foreground">
+          <li>
+            One capped approval on your payout token account. No other token, no
+            SOL.
+          </li>
+          <li>
+            Every ten minutes the keeper sweeps new payouts, swaps on Jupiter,
+            and sends the stock back.
+          </li>
+          <li>
+            Three signatures per run on your statement. Fee is 1% of the output.
+            Revoke in one click.
+          </li>
+        </ul>
       </main>
     );
   }
 
   return (
     <main className="mx-auto max-w-4xl space-y-6 px-6 py-12">
-      <div>
-        <h1 className="text-3xl font-black tracking-tight">Stock DRIP</h1>
-        <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+      <div className="border-b border-border pb-6">
+        <p className="text-xs uppercase tracking-[0.08em] text-muted-foreground">
+          Stock DRIP
+        </p>
+        <h1 className="mt-2 font-serif text-4xl tracking-tight sm:text-5xl">
+          Choose what your payouts become
+        </h1>
+        <p className="mt-3 max-w-xl text-sm text-muted-foreground">
           One approval. Every ten minutes the keeper converts new payouts into
           the stock you pick and sends it back to this wallet. Revoke any time.
         </p>
@@ -320,9 +346,9 @@ export default function DripPage() {
       </div>
 
       {selected && status && (
-        <Card>
+        <Card className={brutalPanel}>
           <CardHeader>
-            <CardTitle className="text-base">
+            <CardTitle className="font-serif text-2xl font-normal tracking-tight">
               Turn {selected.symbol} payouts ({selected.quoteSymbol}) into
             </CardTitle>
           </CardHeader>
@@ -362,7 +388,7 @@ export default function DripPage() {
               </span>
             </label>
 
-            <div className="rounded-lg border p-4">
+            <div className="border-t border-border pt-4">
               <p className="font-medium">What you are approving</p>
               <ul className="mt-2 list-disc space-y-1 pl-5 text-muted-foreground">
                 <li>
@@ -408,13 +434,15 @@ export default function DripPage() {
               </ul>
             </div>
 
-            <div className="flex gap-2">
-              <Button
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                className={brutalButton}
                 onClick={approve}
                 disabled={isSending || capRaw <= 0n || !target || sameAsQuote}
               >
                 {isSending ? "Waiting for wallet…" : "Approve Stock DRIP"}
-              </Button>
+              </button>
               <Button variant="ghost" onClick={() => setSelected(null)}>
                 Cancel
               </Button>

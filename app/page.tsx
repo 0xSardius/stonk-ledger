@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
+import { brutalButton } from "@/lib/ui";
 
 const EXAMPLES = [
   {
@@ -71,10 +72,7 @@ export default function Home() {
           aria-describedby={error ? "wallet-error" : undefined}
           className="h-11 font-mono"
         />
-        <button
-          type="submit"
-          className="h-11 whitespace-nowrap border-2 border-foreground bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-[3px_3px_0_var(--foreground)] transition-transform hover:-translate-y-px focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:translate-x-px active:translate-y-px active:shadow-none motion-reduce:transition-none"
-        >
+        <button type="submit" className={brutalButton}>
           Show my dividends
         </button>
       </form>

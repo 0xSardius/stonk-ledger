@@ -185,6 +185,7 @@ export async function getStatement(
         last: sql<Date>`max(${schema.payouts.blockTime})`,
         usd: sql<string>`coalesce(sum(${schema.payouts.usdAtReceipt}),0)::text`,
         usdCount: sql<number>`count(${schema.payouts.usdAtReceipt})::int`,
+        amountWithUsd: sql<string>`coalesce(sum(case when ${schema.payouts.usdAtReceipt} is not null then ${schema.payouts.amount} else 0 end),0)::text`,
         probable: sql<number>`sum(case when ${schema.payouts.probable} then 1 else 0 end)::int`,
         a24: sql<string>`coalesce(sum(case when ${schema.payouts.blockTime} >= ${since24h} then ${schema.payouts.amount} else 0 end),0)::text`,
         a7: sql<string>`coalesce(sum(case when ${schema.payouts.blockTime} >= ${since7d} then ${schema.payouts.amount} else 0 end),0)::text`,
@@ -234,7 +235,15 @@ export async function getStatement(
         amount,
         shares: amount * multiplier,
         usdToday: quoteUsd != null ? amount * multiplier * quoteUsd : null,
-        usdAtReceipt: agg.usdCount > 0 ? Number(agg.usd) : null,
+        // recorded value where a price was captured within two hours of the
+        // payout, plus today's price for the rest (PRD 8.3: labelled estimated)
+        usdAtReceipt: (() => {
+          const recorded = Number(agg.usd);
+          const missing = amount - Number(agg.amountWithUsd);
+          if (quoteUsd != null)
+            return recorded + missing * multiplier * quoteUsd;
+          return agg.usdCount > 0 ? recorded : null;
+        })(),
         usdAtReceiptCoverage: agg.count ? agg.usdCount / agg.count : 0,
         count: agg.count,
         first: new Date(agg.first),
@@ -256,14 +265,21 @@ export async function getStatement(
             createdAt: del.createdAt,
           }
         : null,
-      payouts: rows.map((r) => ({
-        sig: r.sig,
-        blockTime: r.blockTime,
-        amount: Number(r.amount),
-        usdAtReceipt: r.usdAtReceipt != null ? Number(r.usdAtReceipt) : null,
-        usdEstimated: r.usdEstimated,
-        probable: r.probable,
-      })),
+      payouts: rows.map((r) => {
+        const recorded = r.usdAtReceipt != null ? Number(r.usdAtReceipt) : null;
+        const estimated =
+          recorded == null && quoteUsd != null
+            ? Number(r.amount) * multiplier * quoteUsd
+            : null;
+        return {
+          sig: r.sig,
+          blockTime: r.blockTime,
+          amount: Number(r.amount),
+          usdAtReceipt: recorded ?? estimated,
+          usdEstimated: r.usdEstimated || recorded == null,
+          probable: r.probable,
+        };
+      }),
     });
   }
   out.sort((a, b) => (b.totals.usdToday ?? 0) - (a.totals.usdToday ?? 0));

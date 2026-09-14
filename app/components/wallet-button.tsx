@@ -127,7 +127,7 @@ export function WalletButton() {
           onClick={() => (isOpen ? close() : open())}
           aria-expanded={isOpen}
           aria-controls={isOpen ? "wallet-options" : undefined}
-          className="cursor-pointer rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground shadow-xs transition hover:bg-primary/90"
+          className="cursor-pointer border border-foreground bg-transparent px-3 py-1.5 text-xs font-medium text-foreground transition-colors duration-100 hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         >
           Connect Wallet
         </button>
