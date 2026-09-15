@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import useSWR from "swr";
 import { address } from "@solana/kit";
 import { useConnectedWallet } from "@solana/kit-plugin-wallet/react";
@@ -37,6 +38,8 @@ type Candidate = {
     targetMint: string;
     capRaw: string;
     delegatedRemainingRaw: string | null;
+    pendingUi: number | null;
+    pendingUsd: number | null;
     thresholdUsd: string;
     approvedSig: string | null;
     createdAt: string;
@@ -233,6 +236,17 @@ export default function DripPage() {
           One approval. Every ten minutes the keeper converts new payouts into
           the stock you pick and sends it back to this wallet. Revoke any time.
         </p>
+        <p className="mt-3 text-sm">
+          <Link
+            href={`/wallet/${wallet}`}
+            className="text-primary underline underline-offset-2"
+          >
+            Your statement →
+          </Link>
+          <span className="ml-2 text-xs text-muted-foreground">
+            every run shows up there with its three signatures
+          </span>
+        </p>
       </div>
 
       {isLoading && !status && (
@@ -303,6 +317,24 @@ export default function DripPage() {
                       </>
                     )}
                   </p>
+                  {c.delegation.pendingUi != null && (
+                    <p className="text-xs tabular-nums">
+                      Pending since approval:{" "}
+                      {c.delegation.pendingUi.toLocaleString("en-US", {
+                        maximumFractionDigits: 6,
+                      })}{" "}
+                      {c.quoteSymbol}
+                      {c.delegation.pendingUsd != null && (
+                        <> (${c.delegation.pendingUsd.toFixed(2)})</>
+                      )}
+                      {" · "}
+                      {c.delegation.pendingUsd != null &&
+                      c.delegation.pendingUsd >=
+                        Number(c.delegation.thresholdUsd)
+                        ? "sweeps on the next keeper pass"
+                        : `sweeps at $${c.delegation.thresholdUsd}`}
+                    </p>
+                  )}
                   {c.delegation.delegatedRemainingRaw != null && (
                     <p className="text-xs tabular-nums">
                       Cap remaining:{" "}

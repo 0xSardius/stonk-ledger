@@ -82,6 +82,17 @@ export default function Home() {
         </p>
       )}
 
+      <p className="mt-3 text-xs text-muted-foreground">
+        No wallet connection needed for a statement. Connect only when you turn
+        on Stock DRIP. Coins that pay in stocks are listed under{" "}
+        <Link
+          href="/coins"
+          className="text-primary underline underline-offset-2"
+        >
+          Coins
+        </Link>
+        .
+      </p>
       <p className="mt-6 text-sm text-muted-foreground">
         Or look at{" "}
         {EXAMPLES.map((e, i) => (

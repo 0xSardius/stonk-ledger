@@ -1,5 +1,14 @@
 import { NextResponse } from "next/server";
-import { and, eq, gte, inArray, isNull, sql } from "drizzle-orm";
+import {
+  and,
+  desc,
+  eq,
+  gte,
+  inArray,
+  isNotNull,
+  isNull,
+  sql,
+} from "drizzle-orm";
 import { db, schema } from "@/lib/db";
 import { HeliusClient } from "@/lib/helius/client";
 import { heldActiveCoins } from "@/lib/jobs/held-coins";
@@ -84,6 +93,43 @@ export async function GET(req: Request) {
         delegatedRemainingRaw = null;
       }
     }
+    // what the keeper would sweep next: payouts since approval minus swept
+    let pendingUi: number | null = null;
+    let pendingUsd: number | null = null;
+    if (del) {
+      const [since] = await d
+        .select({
+          amount: sql<string>`coalesce(sum(${schema.payouts.amount}),0)::text`,
+        })
+        .from(schema.payouts)
+        .where(
+          and(
+            eq(schema.payouts.wallet, wallet),
+            eq(schema.payouts.coinId, del.coinId),
+            gte(schema.payouts.blockTime, del.createdAt)
+          )
+        );
+      const [swept] = await d
+        .select({
+          amount: sql<string>`coalesce(sum(${schema.dripRuns.inAmount}),0)::text`,
+        })
+        .from(schema.dripRuns)
+        .where(
+          and(
+            eq(schema.dripRuns.wallet, wallet),
+            eq(schema.dripRuns.coinId, del.coinId),
+            isNotNull(schema.dripRuns.swapSig)
+          )
+        );
+      pendingUi = Math.max(0, Number(since.amount) - Number(swept.amount));
+      const [price] = await d
+        .select({ usd: schema.priceSnapshots.usd })
+        .from(schema.priceSnapshots)
+        .where(eq(schema.priceSnapshots.mint, del.quoteMint))
+        .orderBy(desc(schema.priceSnapshots.ts))
+        .limit(1);
+      pendingUsd = price ? pendingUi * Number(price.usd) : null;
+    }
     candidates.push({
       coinId: c.id,
       symbol: c.symbol,
@@ -105,6 +151,8 @@ export async function GET(req: Request) {
             targetMint: del.targetMint,
             capRaw: del.capRaw.toString(),
             delegatedRemainingRaw,
+            pendingUi,
+            pendingUsd,
             thresholdUsd: del.thresholdUsd,
             approvedSig: del.approvedSig,
             createdAt: del.createdAt,

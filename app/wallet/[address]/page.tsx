@@ -340,12 +340,17 @@ function CoinSection({ c }: { c: CoinStatement }) {
             </Link>
           </>
         ) : (
-          <Link
-            href="/drip"
-            className="text-primary underline underline-offset-2"
-          >
-            Turn these {c.quoteSymbol} payouts into the stock you want →
-          </Link>
+          <span>
+            <Link
+              href="/drip"
+              className="text-primary underline underline-offset-2"
+            >
+              Turn on Stock DRIP for these {c.quoteSymbol} payouts →
+            </Link>
+            <span className="ml-2 text-xs text-muted-foreground">
+              needs this wallet connected
+            </span>
+          </span>
         )}
         <Link
           href={`/coin/${c.mint}`}
