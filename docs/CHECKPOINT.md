@@ -11,6 +11,15 @@ Product is ready to submit; the gap is the package. In this order:
 2. **Owner:** register on hackathons.solana.com if not done; open the statement and `/drip` on a phone and report anything wrong (375px never verified by Claude); record both videos from the scripts; submit with repo, live URL, videos.
 3. Optional if time: post one statement link on X to check the share-card unfurl; a second DRIP run lands by itself when the test wallet's pending payouts pass $0.05.
 
+### Hackathon page re-check (2026-09-16, evening)
+
+Verified from the page payload at hackathons.solana.com/hackathons/stocklana:
+
+- **Deadline moved to 2026-09-25T20:00Z (Sep 25, 4 pm ET).** The header, countdown, and the machine-readable field all say Sep 25; only the stale "Rules" paragraph still says Sep 18. Judging runs through Oct 2. Field: 618 registered, 87 submissions, prize pool $121,000.
+- **Main track $100k.** Wedges named on the page: "Investing: recurring buys, index baskets, robo portfolios" and "Credit and yield: ... dividends". Judging question: "could this be a real app that people will actually use?" (real user, end-to-end demo, reason it belongs on Solana, execution quality).
+- **Five bounties.** Meteora DBC $5k (no fit, we do not touch DBC). Clawpump agent $5k (no fit, requires launching a token). PreStocks $5k (strong fit: 300 seeded coins pay in PreStocks tokens, 5,834 attributed payouts to 2,476 wallets already in the ledger, AGI alone 4,281 payouts to 2,053 wallets). Tessera $6k (fit if T-OpenAI, T-Kalshi, T-SpaceX become DRIP targets; no StonkFun coin pays in them). Pyth market data (prize is 3 months of Pyth Pro, judged on how central Pyth is; we price with Jupiter today).
+- **Sponsor tokens are DRIP-ready with config only:** all Tessera and PreStocks mints are Token-2022, 9 decimals, priced on Jupiter Price v3 with $85k to $575k liquidity, and Ultra dry-runs route STONK into T-OpenAI and into ANTHROPIC (PreStocks). `lib/drip/run.ts` already assumes Token-2022 targets. Coverage query: `pnpm tsx scripts/research/sponsor-coverage.ts`.
+
 Submission checklist status: public MIT repo ✓, README five-minute setup ✓, `.env.example` ✓, seed script ✓, classifier fixture test ✓, keeper fixture test ✓, live mainnet demo ✓, registration ?, pitch video ✗, technical video ✗, description ✗.
 **Spec:** `docs/PRD.md` v0.5 (DRIP-first). Entry decision: `.superstack/entry-scoring.md`. Handoff: `.superstack/idea-context.md`, `.superstack/build-context.md`.
 **Research repo:** `../stonkfun-product-ideas` (private; idea reports, red-team, protocol facts)
