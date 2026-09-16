@@ -20,7 +20,19 @@ import { brutalButton, brutalPanel } from "@/lib/ui";
 
 const TOKEN_2022 = "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
 
-type Target = { symbol: string; name: string; mint: string; decimals: number };
+type Target = {
+  symbol: string;
+  name: string;
+  mint: string;
+  decimals: number;
+  issuer: "xStocks" | "PreStocks" | "Tessera";
+};
+
+const ISSUER_GROUPS: { issuer: Target["issuer"]; label: string }[] = [
+  { issuer: "xStocks", label: "Public stocks, xStocks" },
+  { issuer: "PreStocks", label: "Pre-IPO, PreStocks" },
+  { issuer: "Tessera", label: "Pre-IPO, Tessera" },
+];
 type Candidate = {
   coinId: number;
   symbol: string;
@@ -385,23 +397,40 @@ export default function DripPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-sm">
-            <div className="flex flex-wrap gap-2">
-              {status.targets.map((t) => (
-                <Button
-                  key={t.mint}
-                  size="sm"
-                  variant={t.mint === targetMint ? "default" : "outline"}
-                  onClick={() => setTargetChoice(t.mint)}
-                  disabled={t.mint === selected.quoteMint}
-                  title={
-                    t.mint === selected.quoteMint
-                      ? "You are already paid in this stock"
-                      : t.name
-                  }
-                >
-                  {t.symbol}
-                </Button>
-              ))}
+            <div className="space-y-3">
+              {ISSUER_GROUPS.map((g) => {
+                const list = status.targets.filter(
+                  (t) => t.issuer === g.issuer
+                );
+                if (list.length === 0) return null;
+                return (
+                  <div key={g.issuer}>
+                    <p className="mb-1.5 text-xs uppercase tracking-[0.08em] text-muted-foreground">
+                      {g.label}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {list.map((t) => (
+                        <Button
+                          key={t.mint}
+                          size="sm"
+                          variant={
+                            t.mint === targetMint ? "default" : "outline"
+                          }
+                          onClick={() => setTargetChoice(t.mint)}
+                          disabled={t.mint === selected.quoteMint}
+                          title={
+                            t.mint === selected.quoteMint
+                              ? "You are already paid in this stock"
+                              : t.name
+                          }
+                        >
+                          {t.symbol}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
             <label className="block">
