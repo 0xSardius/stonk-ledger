@@ -1,7 +1,17 @@
 # Checkpoint — Stonk Ledger
 
-**Last updated:** 2026-09-14 (evening)
-**Phase:** Build. Days 0 to 4 complete, UX pass done. Remaining: owner mobile check, pitch video, technical video, submission (deadline 2026-09-18).
+**Last updated:** 2026-09-16
+**Phase:** Product complete and verified on production. Submission package not done. Deadline 2026-09-18; target submit 2026-09-17.
+
+## Resume here (next session)
+
+Product is ready to submit; the gap is the package. In this order:
+
+1. **Claude, first thing:** draft `docs/SUBMISSION.md` with (a) the submission description (opening line from PRD 13: "Thousands of Solana meme coins now pay dividends in tokenized stocks. Stonk Ledger is the receipt and the reinvestment..."), (b) the 3-minute pitch script with exact wallets and clicks in PRD 13 order (TREE holder `4di7dpumucn9xr3Wt2SpMxP1kjpX7iM8KhgtnhCLPoVa` statement, proof link, owner wallet `88tvtBFWdb814MGm2PoGXXDqpEvntpxEwC8ayhbbJoN` on `/drip` with the three signatures, `/coins`, share card), (c) the 5-minute technical script keyed to `docs/RESEARCH.md` (distributor evidence, holder distribution), `docs/SECURITY.md` (keeper trust model), the webhook, the schema, and the two fixture tests. Name the three risks honestly: scheduled keeper with a 5-minute cron floor, shared delegation when two coins pay the same stock, estimated USD at receipt before Sep 13.
+2. **Owner:** register on hackathons.solana.com if not done; open the statement and `/drip` on a phone and report anything wrong (375px never verified by Claude); record both videos from the scripts; submit with repo, live URL, videos.
+3. Optional if time: post one statement link on X to check the share-card unfurl; a second DRIP run lands by itself when the test wallet's pending payouts pass $0.05.
+
+Submission checklist status: public MIT repo ✓, README five-minute setup ✓, `.env.example` ✓, seed script ✓, classifier fixture test ✓, keeper fixture test ✓, live mainnet demo ✓, registration ?, pitch video ✗, technical video ✗, description ✗.
 **Spec:** `docs/PRD.md` v0.5 (DRIP-first). Entry decision: `.superstack/entry-scoring.md`. Handoff: `.superstack/idea-context.md`, `.superstack/build-context.md`.
 **Research repo:** `../stonkfun-product-ideas` (private; idea reports, red-team, protocol facts)
 
