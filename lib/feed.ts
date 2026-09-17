@@ -76,6 +76,17 @@ export async function getCoinFeed(
     })
     .from(pb)
     .where(eq(pb.coinId, c.id));
+  // batches older than the retention window live in payout_daily
+  const pd = schema.payoutDaily;
+  const [rolled] = await d
+    .select({
+      batches: sql<number>`coalesce(sum(${pd.batches}),0)::int`,
+      payouts: sql<number>`coalesce(sum(${pd.recipients}),0)::int`,
+      amount: sql<string>`coalesce(sum(${pd.amount}),0)::text`,
+      first: sql<string | null>`min(${pd.day})::text`,
+    })
+    .from(pd)
+    .where(eq(pd.coinId, c.id));
   const [agg24] = await d
     .select({
       batches: sql<number>`count(*)::int`,
@@ -137,10 +148,14 @@ export async function getCoinFeed(
     quoteUsd,
     multiplier,
     totals: {
-      batches: agg.batches,
-      payouts: agg.payouts,
-      amount: Number(agg.amount),
-      firstSeen: agg.first ? new Date(agg.first) : null,
+      batches: agg.batches + rolled.batches,
+      payouts: agg.payouts + rolled.payouts,
+      amount: Number(agg.amount) + Number(rolled.amount),
+      firstSeen: rolled.first
+        ? new Date(rolled.first)
+        : agg.first
+          ? new Date(agg.first)
+          : null,
       lastSeen: agg.last ? new Date(agg.last) : null,
       batches24h: agg24.batches,
       amount24h: Number(agg24.amount),
@@ -196,7 +211,7 @@ export async function listCoins(
       quoteCategory: schema.coins.quoteCategory,
       marketCapUsd: schema.coins.marketCapUsd,
       volume24hUsd: schema.coins.volume24hUsd,
-      payoutsStored: sql<number>`(select coalesce(sum(recipients),0)::int from payout_batches b where b.coin_id = ${schema.coins.id})`,
+      payoutsStored: sql<number>`(select coalesce(sum(recipients),0)::int from payout_batches b where b.coin_id = ${schema.coins.id}) + (select coalesce(sum(recipients),0)::int from payout_daily r where r.coin_id = ${schema.coins.id})`,
       lastPayout: sql<Date | null>`(select max(block_time) from payout_batches b where b.coin_id = ${schema.coins.id})`,
     })
     .from(schema.coins)

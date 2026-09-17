@@ -38,7 +38,7 @@ A single Ed25519 keypair. The secret lives in the deploy environment (`DRIP_KEEP
 ## Web surface
 
 - `/api/rpc` relays a fixed allow-list of JSON-RPC methods to Helius so the browser never sees the API key.
-- `/api/webhooks/helius` requires the registration secret in the `Authorization` header and answers 403 otherwise. Inserts are idempotent on (signature, wallet), so retries and replays cannot duplicate rows.
+- There is no inbound webhook. Fresh batches are pulled from the distributor's history by a scheduled job, so no third party can post data into the database. Inserts are idempotent on (signature, wallet), so overlapping pulls cannot duplicate rows.
 - `/api/drip/approve` and `/revoke` verify the delegation on chain before touching the database; a client cannot record a delegation that does not exist.
 - No secrets are printed by any script. `.env` is gitignored and was never committed.
 

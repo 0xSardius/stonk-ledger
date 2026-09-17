@@ -1,0 +1,32 @@
+# Once a day: refresh the coin catalog from StonkFun (top 1,000 per quote
+# category by 24h volume; new coins, fresh ranks and metadata) and fold
+# batches older than 14 days into payout_daily so storage stays flat.
+name: daily
+
+on:
+  schedule:
+    - cron: "23 3 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: daily
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm seed --pages=10
+      - run: pnpm job rollup-batches 14

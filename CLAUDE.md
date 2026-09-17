@@ -8,7 +8,7 @@ Stonk Ledger: a Stocklana hackathon entry (Solana Foundation; submissions close 
 
 **Positioning (decided 2026-09-12):** Stock DRIP is the headline feature. The ledger is the plumbing DRIP needs and the proof that each run happened. Lead every pitch, README, and page with DRIP. Scoring is in `.superstack/entry-scoring.md`.
 
-**Current state (2026-09-16):** live at https://stonk-ledger.vercel.app. Statement, share card, proof feed, DRIP (three mainnet runs, the third into a Tessera token), Helius webhook on the distributor, workers on GitHub Actions. Brand applied per `brand.md`. Entered for the main track plus the PreStocks and Tessera bounties. Next: `docs/SUBMISSION.md`, videos, submit by 2026-09-23. Read `docs/CHECKPOINT.md` first in every session; it holds the day-by-day status and blockers. `docs/PRD.md` v0.5 is the spec. `.superstack/idea-context.md` and `.superstack/build-context.md` are the phase handoffs.
+**Current state (2026-09-16):** live at https://stonk-ledger.vercel.app. Statement, share card, proof feed, DRIP (three mainnet runs, the third into a Tessera token), scheduled pull of distributor batches, all jobs on GitHub Actions. Brand applied per `brand.md`. Entered for the main track plus the PreStocks and Tessera bounties. Next: `docs/SUBMISSION.md`, videos, submit by 2026-09-23. Read `docs/CHECKPOINT.md` first in every session; it holds the day-by-day status and blockers. `docs/PRD.md` v0.5 is the spec. `.superstack/idea-context.md` and `.superstack/build-context.md` are the phase handoffs.
 
 ## Commands
 
@@ -27,7 +27,8 @@ pnpm seed                # upsert coins from StonkFun; --pages=N, --decimals
 pnpm index-wallet <addr> [--pages=N]      # index one wallet now
 pnpm job snapshot-prices | snapshot-rewards | drip-once   # one-shot jobs
 pnpm worker:indexer | worker:rate-cacher | worker:drip-keeper
-pnpm tsx scripts/register-webhook.ts <https://app-url> | --list   # Helius webhook on the distributor
+pnpm job ingest-distributor [maxPages] | rollup-batches [days]   # scheduled pull of distributor batches; fold old batches into payout_daily
+pnpm tsx scripts/backfill-batches.ts --pages=400   # deeper pull after an outage
 pnpm tsx scripts/research/find-distributor.ts <coinMint>       # PRD 8.1
 pnpm tsx scripts/research/holder-distribution.ts <coinMint>    # payout percentiles
 pnpm ci                  # build + typecheck + lint + format:check + test
@@ -45,7 +46,8 @@ Next.js 16 App Router, React 19, TypeScript, Tailwind 4, shadcn/ui (base-nova st
 - `lib/` server-only code: `lib/env.ts` (zod-validated env, import only server-side), `lib/db/` (Drizzle schema and lazy client), `lib/stonkfun/` (API client and pure mappers), `lib/helius/` (paced RPC + enhanced history), `lib/classify.ts` (pure payout classifier), `lib/jobs/` (index-wallet, snapshots), `lib/drip/` (targets, Ultra, keeper signer, sweep arithmetic, verify, run), `lib/prices/`.
 - The payout distributor is one platform wallet, `5KXDF6QnqhBj72hDtJNkkpFaQVUfbFXNybMsp3DiK6tD`, stored on every coin row. Evidence in `docs/RESEARCH.md`.
 - Helius free tier rate-limits. `HeliusClient` paces at 4 calls/s and retries on 429. Never run two Helius-heavy scripts at once.
-- Fresh payouts arrive through the Helius webhook on the distributor address, not by polling. History walks are only for backfill on first view. `payouts` is keyed by (sig, wallet) because one batch pays many wallets. **Retention (2026-09-16):** the webhook stores per-recipient `payouts` rows only for tracked wallets (in `wallets`, or with a delegation) and one `payout_batches` row per batch for the feed and coin totals. Storing every recipient filled the 0.5 GB Neon tier in three days (908k rows) and every insert failed with SQLSTATE 53100. Never add an all-wallets write path again.
+- **Ingestion is a scheduled pull, not a webhook (decided 2026-09-17).** `pnpm job ingest-distributor` runs every 10 minutes in `keeper.yml`: it reads the distributor's recent history from Helius and stops two minutes past the newest stored batch. The Helius webhook that preceded it fired once per distributor transaction (about 50k a day) and was on a path past Vercel's free invocation limit; the earlier rule "webhook, not polling" was wrong at this scale. The keeper re-indexes its own wallets before each pass, so DRIP never depends on platform ingestion. Statements read the viewed wallet's own history on first view.
+- **Retention.** `payouts` keeps per-recipient rows only for tracked wallets (in `wallets`, or with a delegation), keyed by (sig, wallet) because one batch pays many wallets. `payout_batches` keeps one row per batch for a 14-day window; `daily.yml` folds older rows into `payout_daily` (one row per coin, quote mint, UTC day) so all-time totals survive and storage stays flat. Storing every recipient filled the 0.5 GB Neon tier in three days (908k rows, SQLSTATE 53100 on every insert). Never add an all-wallets write path again.
 - A wallet can hold hundreds of mints. Intersect held mints with active coins in memory (`lib/jobs/held-coins.ts`), never with a giant SQL IN list.
 - `workers/` long-running loops sharing `workers/_loop.ts`.
 - `scripts/` one-shot CLIs run with `tsx`.

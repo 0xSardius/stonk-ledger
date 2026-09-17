@@ -59,9 +59,8 @@ pnpm test -- tests/drip-run.test.ts  # keeper decision path against mainnet fixt
 
 ## Deploy
 
-- **App:** Vercel, repo connected. Production env: `DATABASE_URL`, `HELIUS_API_KEY`, `HELIUS_WEBHOOK_SECRET`, `DRIP_KEEPER_SECRET_KEY`, `NEXT_PUBLIC_APP_URL`.
-- **Webhook:** once, after the first deploy: `pnpm tsx scripts/register-webhook.ts https://<app>`.
-- **Workers:** GitHub Actions (`.github/workflows/workers.yml`) runs prices every 5 minutes, the keeper every 10, reward snapshots hourly. Repo secrets `DATABASE_URL`, `HELIUS_API_KEY`, `DRIP_KEEPER_SECRET_KEY`. The `workers/` loops exist for a long-running host if you prefer one.
+- **App:** Vercel, repo connected. Production env: `DATABASE_URL`, `HELIUS_API_KEY`, `DRIP_KEEPER_SECRET_KEY`, `NEXT_PUBLIC_APP_URL`.
+- **Scheduled jobs:** GitHub Actions, one cron per file under `.github/workflows/`: `prices.yml` every 5 minutes; `keeper.yml` every 10 minutes pulls the distributor's new batches (`pnpm job ingest-distributor`) then runs the DRIP keeper; `rewards.yml` hourly; `daily.yml` refreshes the coin catalog (`pnpm seed --pages=10`) and rolls batches older than 14 days into daily totals. Repo secrets `DATABASE_URL`, `HELIUS_API_KEY`, `DRIP_KEEPER_SECRET_KEY`. Nothing runs between passes, so cost scales with our users, not with StonkFun's traffic. The `workers/` loops exist for a long-running host if you prefer one.
 
 ## Stack
 

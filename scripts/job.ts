@@ -29,7 +29,15 @@ async function main() {
         .from(schema.dripDelegations)
         .where(isNull(schema.dripDelegations.revokedSig));
       console.log(`${active.length} active delegations`);
+      const { indexWallet } = await import("../lib/jobs/index-wallet");
       for (const del of active) {
+        // the keeper refreshes its own wallets' payouts from chain before
+        // deciding what is pending; it does not depend on platform ingestion
+        try {
+          await indexWallet(del.wallet, { maxPages: 2 });
+        } catch (err) {
+          console.error(`index ${del.wallet.slice(0, 8)} failed`, err);
+        }
         const r = await runDelegation(del);
         console.log(
           del.wallet.slice(0, 8),
@@ -38,6 +46,21 @@ async function main() {
           )
         );
       }
+      return;
+    }
+    case "ingest-distributor": {
+      const { ingestDistributor } =
+        await import("../lib/jobs/ingest-distributor");
+      const s = await ingestDistributor({
+        maxPages: Number(rest[0] ?? 30),
+        log: console.log,
+      });
+      console.log("ingested", s);
+      return;
+    }
+    case "rollup-batches": {
+      const { rollupBatches } = await import("../lib/jobs/rollup-batches");
+      console.log("rolled up", await rollupBatches(Number(rest[0] ?? 14)));
       return;
     }
     default:

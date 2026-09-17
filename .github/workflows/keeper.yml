@@ -1,4 +1,6 @@
-# Stock DRIP keeper: one pass over every active delegation every 10 minutes (PRD F2).
+# Every 10 minutes: pull the distributor's new batches (replaces the Helius
+# webhook, 2026-09-17), then one Stock DRIP keeper pass over every active
+# delegation (PRD F2). The keeper re-indexes its own wallets before each run.
 name: keeper
 
 on:
@@ -13,7 +15,7 @@ concurrency:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       HELIUS_API_KEY: ${{ secrets.HELIUS_API_KEY }}
@@ -28,4 +30,5 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm job ingest-distributor 30
       - run: pnpm job drip-once

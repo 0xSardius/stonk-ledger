@@ -4,6 +4,7 @@
 import {
   bigint,
   boolean,
+  date,
   index,
   integer,
   numeric,
@@ -92,6 +93,26 @@ export const payoutBatches = pgTable(
     index("payout_batches_coin_time_idx").on(t.coinId, t.blockTime),
     index("payout_batches_quote_time_idx").on(t.quoteMint, t.blockTime),
   ]
+);
+
+/**
+ * Batches older than the retention window, folded into one row per coin,
+ * quote mint, and UTC day by `lib/jobs/rollup-batches.ts`. Keeps all-time
+ * totals while `payout_batches` stays a rolling window. `coin_id` 0 means
+ * the batch was never attributed to a coin.
+ */
+export const payoutDaily = pgTable(
+  "payout_daily",
+  {
+    coinId: integer("coin_id").notNull(),
+    quoteMint: text("quote_mint").notNull(),
+    day: date("day").notNull(),
+    batches: integer("batches").notNull(),
+    recipients: integer("recipients").notNull(),
+    amount: numeric("amount").notNull(),
+    usdAtReceipt: numeric("usd_at_receipt"),
+  },
+  (t) => [primaryKey({ columns: [t.coinId, t.quoteMint, t.day] })]
 );
 
 export const priceSnapshots = pgTable(
