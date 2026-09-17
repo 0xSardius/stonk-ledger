@@ -17,7 +17,9 @@ const flag = (name: string) =>
 
 async function main() {
   if (!wallet || !quoteMint) {
-    console.error("usage: <wallet> <quoteMint> [--target=<mint>] [--threshold=<usd>]");
+    console.error(
+      "usage: <wallet> <quoteMint> [--target=<mint>] [--threshold=<usd>]"
+    );
     process.exit(2);
   }
   const d = db();

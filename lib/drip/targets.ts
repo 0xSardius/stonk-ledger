@@ -165,7 +165,11 @@ const TESSERA: DripTarget[] = [
   },
 ];
 
-export const DRIP_TARGETS: DripTarget[] = [...XSTOCKS, ...PRESTOCKS, ...TESSERA];
+export const DRIP_TARGETS: DripTarget[] = [
+  ...XSTOCKS,
+  ...PRESTOCKS,
+  ...TESSERA,
+];
 
 export const DEFAULT_TARGET = DRIP_TARGETS[0];
 

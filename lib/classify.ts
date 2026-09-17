@@ -99,7 +99,15 @@ export function classifyTx(
       .filter((t) => t.mint === rule.quoteMint)
       .map((t) => t.toUserAccount)
   ).size;
-  const fromDistributor = rule.distributorSigners.includes(tx.feePayer);
+  // Tokens leaving a distributor wallet is the signal. The fee payer was that
+  // wallet until 2026-09-17; StonkFun now pays fees from separate wallets.
+  const fromDistributor =
+    rule.distributorSigners.includes(tx.feePayer) ||
+    inbound.some(
+      (t) =>
+        !!t.fromUserAccount &&
+        rule.distributorSigners.includes(t.fromUserAccount)
+    );
   const probable =
     !fromDistributor && destinations >= PROBABLE_MIN_DESTINATIONS;
   if (!fromDistributor && !probable) return { kind: "other" };

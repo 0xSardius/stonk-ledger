@@ -216,19 +216,19 @@ watches(chat_id, wallet, coin_id, mode text, created_at, last_ping_at)
 
 ## 12. Build plan (7 days to 2026-09-18, then the extension to 2026-09-25)
 
-| Day | Date   | Deliverable                                                                                                                                 | Done when                                                              |
-| --- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| 0   | Sep 11 | Register on hackathons.solana.com. Repo, Next.js 15, Drizzle, Neon, Helius key, coins table seeded across all categories, `.env` gitignored | `/api/health` lists 300+ reward coins with quote categories            |
-| 1   | Sep 12 | Distributor identified for TREE, DIVI, KNOTS; rate-cacher; indexer and classifier                                                           | `docs/RESEARCH.md` has evidence; 10 wallets indexed                    |
-| 2   | Sep 13 | DRIP approval flow, keeper, revoke, run log (F2)                                                                                            | One mainnet DRIP run with three signatures on a test wallet            |
-| 3   | Sep 14 | Statement page with DRIP runs inline, share card (F1, F3 cards)                                                                             | Public URL; three cards posted with proof links                        |
-| 4   | Sep 15 | Proof feed, second DRIP target, 10 coins live from config (F3 feed, F7)                                                                     | Second and third coins render with no code change; second target swaps |
-| 5   | Sep 16 | Portfolio view, polish, README and setup, security notes, classifier and keeper tests                                                       | A stranger can run it from the README; both tests pass                 |
-| 6   | Sep 17 | Pitch video (3 min), technical video (5 min), submission text; submit                                                                       | Submitted with all links                                               |
-| 7   | Sep 18 | Buffer. Fix what judges would hit first.                                                                                                    | Nothing left on the critical path                                      |
-| Ext | Sep 16 | Deadline extended to Sep 25. Five bounties added. PreStocks and Tessera targets shipped, third DRIP run into T-OpenAI                       | Entered: main, PreStocks, Tessera                                      |
-| Ext | Sep 23 | Submit with repo, live URL, both videos, `docs/SUBMISSION.md` text                                                                          | Submitted two days early                                               |
-| Ext | Sep 24 to 25 | Buffer. Edits allowed until close.                                                                                                     | Nothing left on the critical path                                      |
+| Day | Date         | Deliverable                                                                                                                                 | Done when                                                              |
+| --- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| 0   | Sep 11       | Register on hackathons.solana.com. Repo, Next.js 15, Drizzle, Neon, Helius key, coins table seeded across all categories, `.env` gitignored | `/api/health` lists 300+ reward coins with quote categories            |
+| 1   | Sep 12       | Distributor identified for TREE, DIVI, KNOTS; rate-cacher; indexer and classifier                                                           | `docs/RESEARCH.md` has evidence; 10 wallets indexed                    |
+| 2   | Sep 13       | DRIP approval flow, keeper, revoke, run log (F2)                                                                                            | One mainnet DRIP run with three signatures on a test wallet            |
+| 3   | Sep 14       | Statement page with DRIP runs inline, share card (F1, F3 cards)                                                                             | Public URL; three cards posted with proof links                        |
+| 4   | Sep 15       | Proof feed, second DRIP target, 10 coins live from config (F3 feed, F7)                                                                     | Second and third coins render with no code change; second target swaps |
+| 5   | Sep 16       | Portfolio view, polish, README and setup, security notes, classifier and keeper tests                                                       | A stranger can run it from the README; both tests pass                 |
+| 6   | Sep 17       | Pitch video (3 min), technical video (5 min), submission text; submit                                                                       | Submitted with all links                                               |
+| 7   | Sep 18       | Buffer. Fix what judges would hit first.                                                                                                    | Nothing left on the critical path                                      |
+| Ext | Sep 16       | Deadline extended to Sep 25. Five bounties added. PreStocks and Tessera targets shipped, third DRIP run into T-OpenAI                       | Entered: main, PreStocks, Tessera                                      |
+| Ext | Sep 23       | Submit with repo, live URL, both videos, `docs/SUBMISSION.md` text                                                                          | Submitted two days early                                               |
+| Ext | Sep 24 to 25 | Buffer. Edits allowed until close.                                                                                                          | Nothing left on the critical path                                      |
 
 No day goes to StonkFlow (decided 2026-09-13). The owner has Turbin3 coursework in parallel, so owner-side steps are batched.
 

@@ -4,7 +4,7 @@ What Stonk Ledger can and cannot do with a holder's funds, and how each claim is
 
 ## The ledger
 
-The statement reads public chain data. It never asks for a signature. Payouts are classified by a fixed rule: the transaction's fee payer is the StonkFun distributor `5KXDF6QnqhBj72hDtJNkkpFaQVUfbFXNybMsp3DiK6tD`, no DEX or aggregator program appears in the outer instructions, and the mint equals the coin's quote mint (`lib/classify.ts`, fixture-tested). Anything else is not a payout. Rows that matched by batch shape rather than by signer carry a `probable` flag and are labelled on the page.
+The statement reads public chain data. It never asks for a signature. Payouts are classified by a fixed rule: the tokens leave the StonkFun distributor wallet `5KXDF6QnqhBj72hDtJNkkpFaQVUfbFXNybMsp3DiK6tD` (which paid the fees itself until 2026-09-17 and now uses separate fee-payer wallets), no DEX or aggregator program appears in the outer instructions, and the mint equals the coin's quote mint (`lib/classify.ts`, fixture-tested). Anything else is not a payout. Rows that matched by batch shape rather than by signer carry a `probable` flag and are labelled on the page.
 
 ## Stock DRIP
 

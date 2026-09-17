@@ -56,9 +56,9 @@ describe("DRIP targets", () => {
   });
 
   test("findTarget resolves a Tessera mint and rejects an unknown one", () => {
-    expect(findTarget("oPAiAikWTaFj9RYoRFD35ccfwhnMcB3ThgBZRHSkjTZ")?.symbol).toBe(
-      "T-OpenAI"
-    );
+    expect(
+      findTarget("oPAiAikWTaFj9RYoRFD35ccfwhnMcB3ThgBZRHSkjTZ")?.symbol
+    ).toBe("T-OpenAI");
     expect(findTarget("11111111111111111111111111111111")).toBeNull();
   });
 });

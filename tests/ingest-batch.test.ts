@@ -88,7 +88,18 @@ describe("parseBatch", () => {
     expect(
       parseBatch(load("helius-swap-knots.json"), index, distributors)
     ).toEqual([]);
-    const tx = { ...load("helius-payout-tree.json"), feePayer: "someone-else" };
+    // a plain batch where neither the fee payer nor the token source is a
+    // distributor wallet (a fee payer change alone is still a payout since
+    // 2026-09-17, see tests/new-feepayer.test.ts)
+    const base = load("helius-payout-tree.json");
+    const tx = {
+      ...base,
+      feePayer: "someone-else",
+      tokenTransfers: base.tokenTransfers.map((t) => ({
+        ...t,
+        fromUserAccount: "someone-else",
+      })),
+    };
     expect(parseBatch(tx, index, distributors)).toEqual([]);
   });
 });

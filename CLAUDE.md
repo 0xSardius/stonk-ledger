@@ -63,7 +63,7 @@ Two halves that talk only through Postgres:
   - `drip-keeper`: every 10 min, for each eligible delegation: transfer delegated quote tokens -> Jupiter swap into the target xStock -> send stock back to the holder. Logs `transfer_sig`, `swap_sig`, `return_sig` to `drip_runs`.
   - `telegram-bot`: grammY (stretch).
 
-**Payout classifier (PRD 8.2).** An inbound quote-token transfer is a payout when the signer is in the coin's `distributor_signers`, no DEX or aggregator program appears in the outer instructions, and the mint equals the coin's `quote_mint`. Until a distributor is confirmed, fall back to "batch transfer, many destinations, no DEX program" and mark the row `probable`.
+**Payout classifier (PRD 8.2).** An inbound quote-token transfer is a payout when the tokens leave a wallet in the coin's `distributor_signers` (or that wallet pays the fee), no DEX or aggregator program appears in the outer instructions, and the mint equals the coin's `quote_mint`. Do not key on the fee payer alone: on 2026-09-17 StonkFun moved fee paying to separate wallets and the webhook parsed every real batch as "not a payout" (`docs/RESEARCH.md`, "Fee payer change"). Until a distributor is confirmed, fall back to "batch transfer, many destinations, no DEX program" and mark the row `probable`.
 
 **Generic by design (F7).** Every coin is a row in `coins` seeded from the StonkFun API (`GET /tokens?mode=reward&category=...`). Never hardcode a coin in page or worker logic; adding a coin must be config plus distributor identification only.
 

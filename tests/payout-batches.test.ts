@@ -35,10 +35,17 @@ const tree = {
 } as Coin;
 
 const tx = JSON.parse(
-  readFileSync(path.join(__dirname, "fixtures", "helius-payout-tree.json"), "utf8")
+  readFileSync(
+    path.join(__dirname, "fixtures", "helius-payout-tree.json"),
+    "utf8"
+  )
 ) as ParsedTx;
 
-const [batch] = parseBatch(tx, new Map([[APPLX, [tree]]]), new Set([DISTRIBUTOR]));
+const [batch] = parseBatch(
+  tx,
+  new Map([[APPLX, [tree]]]),
+  new Set([DISTRIBUTOR])
+);
 
 describe("payout batch retention", () => {
   test("toBatchRow sums the whole batch, attributed or not", () => {

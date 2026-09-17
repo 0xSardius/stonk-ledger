@@ -33,13 +33,22 @@ export function parseBatch(
   distributors: ReadonlySet<string>
 ): ParsedBatch[] {
   if (tx.transactionError) return [];
-  if (!distributors.has(tx.feePayer)) return [];
   if (hasDexProgram(tx)) return [];
+  // The signal is tokens leaving a distributor wallet in a plain batch. The
+  // fee payer used to be that wallet; since 2026-09-17 StonkFun pays fees from
+  // separate wallets while the tokens still leave the platform wallet.
+  const fromDistributor = (t: ParsedTx["tokenTransfers"][number]) =>
+    !!t.fromUserAccount && distributors.has(t.fromUserAccount);
+  if (
+    !distributors.has(tx.feePayer) &&
+    !tx.tokenTransfers.some(fromDistributor)
+  )
+    return [];
   const byMint = new Map<string, Map<string, number>>();
   for (const t of tx.tokenTransfers) {
     if (!coinsByQuote.has(t.mint)) continue;
-    if (t.fromUserAccount !== tx.feePayer) continue;
-    if (!t.toUserAccount || t.toUserAccount === tx.feePayer) continue;
+    if (!fromDistributor(t)) continue;
+    if (!t.toUserAccount || distributors.has(t.toUserAccount)) continue;
     const m = byMint.get(t.mint) ?? new Map<string, number>();
     m.set(t.toUserAccount, (m.get(t.toUserAccount) ?? 0) + t.tokenAmount);
     byMint.set(t.mint, m);
@@ -148,9 +157,7 @@ export async function trackedWallets(force = false) {
   const d = db();
   const [viewed, delegated] = await Promise.all([
     d.select({ w: schema.wallets.address }).from(schema.wallets),
-    d
-      .select({ w: schema.dripDelegations.wallet })
-      .from(schema.dripDelegations),
+    d.select({ w: schema.dripDelegations.wallet }).from(schema.dripDelegations),
   ]);
   trackedCache = {
     at: Date.now(),

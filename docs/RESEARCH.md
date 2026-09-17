@@ -18,6 +18,12 @@ It is the fee payer and signer on every batch. Batches are plain token transfers
 
 Sample: 5 largest wallet holders per coin, last 20 transactions on each holder's quote-token account.
 
+## Fee payer change (2026-09-17)
+
+The platform wallet is still the token source of every batch, but it no longer pays the fees. In the distributor's 60 most recent transactions on 2026-09-17 (19:20 UTC), all 788 token transfers leave `5KXDF6QnqhBj72hDtJNkkpFaQVUfbFXNybMsp3DiK6tD`, while the fee payer is `nPbqzU7rkGzpP9LaxwrtPiCjuQawEqg7oxqJJ4u1SL6` on 54 of them and `7P7Xg2fAhzFc1auiv9hsb6nQiEg8CzrCEeGzgsgbovyi` on 6. Batch shape is unchanged: 16 to 20 destinations, Token-2022 or SPL Token transfers only, no DEX program.
+
+The classifier rule was keyed on the fee payer, so the webhook parsed 196 consecutive real deliveries as "not a payout" and the history walk fell back to `probable`. Rule since 2026-09-17: **a payout is a plain batch in which tokens leave a distributor wallet**, whether that wallet or another pays the fee. Fixture: `tests/fixtures/helius-payout-new-feepayer.json`. Replay tool: `pnpm tsx scripts/research/parse-recent-distributor.ts`.
+
 ## Non-distributor inbound transfers
 
 Every other fee payer in the sample is a swap: sources JUPITER, BYREAL, OKX_DEX_ROUTER, DFLOW; programs `JUP6LkbZ...`, `DF1ow4ts...` (Byreal), `proVF4pM...`; 2 to 6 destinations. These are holders buying the quote asset, not payouts. The classifier rule in PRD 8.2 (signer in distributor set, no DEX program, mint equals quote mint) excludes all of them.
