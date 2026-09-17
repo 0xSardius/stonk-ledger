@@ -30,6 +30,19 @@ Verified from the page payload at hackathons.solana.com/hackathons/stocklana:
 4. The statement rows that landed for the TREE holder on Sep 17 via the history walk before fix 2 are flagged `probable`; harmless, labelled on the page.
 5. **Verified on production:** after the classifier deploy, a live webhook delivery stored a real batch with block time 2026-09-17 19:30:20 UTC (later than the backfill's starting point, so it came from the webhook, not the backfill). Ingestion is healthy again.
 
+### Architecture change: webhook removed, scheduled pull (2026-09-17, evening)
+
+Owner asked for the lowest-cost solid design. Numbers: the webhook fired once per distributor transaction, about 50k a day (bursts of 60/s), roughly 1.5M Vercel invocations a month against a 1M free allowance, with Neon never idle. Commit `0355e0b`:
+
+- `pnpm job ingest-distributor` (`lib/jobs/ingest-distributor.ts`) runs first in `keeper.yml` every 10 minutes: reads the distributor's history newest-first, 100 per Helius call, stops two minutes past the newest stored batch, 30-page cap. First local pass: 4 pages, 331 batches, stopped at the floor. `scripts/backfill-batches.ts` is the same code with a deeper cap.
+- The keeper re-indexes each delegating wallet (2 pages) before deciding what is pending, so DRIP never depends on platform ingestion. This closes a latent bug: with the webhook down, pending went stale and nothing swept.
+- `daily.yml` (03:23 UTC): `pnpm seed --pages=10` (top 1,000 coins per quote category; StonkFun has ~45,800 reward coins, most dead) and `pnpm job rollup-batches 14`, which folds batches older than 14 days into `payout_daily` (coin, quote mint, UTC day) in one atomic statement. Feed totals read raw plus rolled. Storage now scales with our users plus a two-week window of batches.
+- Removed: Helius webhook registration (deleted via API, none remain), `app/api/webhooks/helius/route.ts`, `scripts/register-webhook.ts`, `HELIUS_WEBHOOK_SECRET` from env schema and `.env.example`. The Vercel env var of that name can be deleted by the owner; it is unused.
+- Known limit: a single burst above 3,000 distributor transactions inside one 10-minute window would leave a gap the next pass does not revisit; observed peaks are well under that. Rerun `backfill-batches` if it ever happens.
+- Not done: option C (on-demand feed with no platform ingestion at all) is documented in this session's discussion as the post-hackathon step if cost still matters.
+- **Verified on GitHub Actions (dispatched 22:55 UTC, both success):** keeper run pulled 2 pages, 129 batches, then ran the keeper; daily run seeded 4,000 coins (health now reports 4,019) and rolled 219 daily rows for batches older than Sep 3. Production feed after rollup: AGI 479 batches, 4,313 payouts, first seen Aug 11 (from `payout_daily`). Database 69 MB, 97,407 batch rows, 21,491 tracked payout rows.
+- **Owner action before recording:** the test wallet's delegation row is closed. Its cap was fully consumed by the T-OpenAI sweep, the token program clears the delegate at zero, and the keeper closed the row on its next check, as designed. Open `/drip`, connect `88tvtBFW…`, and approve again (any cap, threshold $5 default or lower for a demo).
+
 Submission checklist status: public MIT repo ✓, README five-minute setup ✓, `.env.example` ✓, seed script ✓, classifier fixture test ✓, keeper fixture test ✓, live mainnet demo ✓, registration ?, pitch video ✗, technical video ✗, description ✗.
 **Spec:** `docs/PRD.md` v0.5 (DRIP-first). Entry decision: `.superstack/entry-scoring.md`. Handoff: `.superstack/idea-context.md`, `.superstack/build-context.md`.
 **Research repo:** `../stonkfun-product-ideas` (private; idea reports, red-team, protocol facts)
