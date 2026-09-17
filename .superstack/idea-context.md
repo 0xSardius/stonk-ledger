@@ -1,7 +1,7 @@
 ---
 phase: idea
 completed_at: 2026-09-11T02:45:00Z
-prd_version: 0.4 (Stocklana hackathon edition; deadline 2026-09-18; stock-forward: statement + Stock DRIP primitive)
+prd_version: 0.4 (Stocklana hackathon edition; deadline 2026-09-25 (extended 2026-09-16), target submit 2026-09-23; stock-forward: statement + Stock DRIP primitive)
 red_team: 2026-09-11 found Slawth, The Stonk Board, StonkBot; score 14 -> 12; see docs/PRD.md sections 2, 13, 16
 chosen_idea:
   slug: knot-ledger
@@ -64,7 +64,8 @@ hackathon:
   url: https://hackathons.solana.com/hackathons/stocklana
   organizer: Solana Foundation
   prize: $100,000 main track
-  deadline: 2026-09-18
+  deadline: 2026-09-25 (extended on 2026-09-16 from 2026-09-18; target submit 2026-09-23)
+  tracks_entered: main, PreStocks bounty, Tessera bounty
   field_on_2026-09-11: 35 registered, 4 submissions
   submission: repo, live demo (devnet or mainnet), 3-min pitch video, 5-min technical video
 source_reports:

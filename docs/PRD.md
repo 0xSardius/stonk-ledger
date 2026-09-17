@@ -2,7 +2,7 @@
 
 **Version:** 0.5 (Stocklana hackathon edition, DRIP-first)
 **Date:** 2026-09-12
-**Deadline:** Stocklana submissions close 2026-09-18
+**Deadline:** Stocklana submissions close 2026-09-25, 4 pm ET (extended on 2026-09-16 from 2026-09-18). Target submit: 2026-09-23.
 **Status:** Build now. Seven days.
 **Owner:** 0xsardius
 **Name:** Stonk Ledger (formerly Knot Ledger, then Dividend Ledger)
@@ -39,7 +39,7 @@ Hundreds of thousands of wallets are accumulating tokenized stock through meme c
 | Organizer           | Solana Foundation                                                                                                                                       |
 | Prize               | $100,000, single main track, no sponsor bounties listed yet                                                                                             |
 | Brief               | "One week to build something innovative with stocks on Solana"                                                                                          |
-| Deadline            | 2026-09-18                                                                                                                                              |
+| Deadline            | 2026-09-25 4 pm ET (extended 2026-09-16); target submit 2026-09-23. Tracks entered: main, PreStocks bounty, Tessera bounty                              |
 | Field on 2026-09-11 | 35 registered, 4 submissions                                                                                                                            |
 | Judging             | Solana Foundation judges see all submissions and score 1 to 10. No published criteria.                                                                  |
 | Submission          | Optional GitHub repo, live demo (devnet or mainnet), pitch video (3 min max), technical video (5 min), team invites by username; up to 3 sponsor tracks |
@@ -50,7 +50,7 @@ Hundreds of thousands of wallets are accumulating tokenized stock through meme c
 
 ## 3. Goals and non-goals
 
-### Goals by 2026-09-18
+### Goals by 2026-09-23 (submission)
 
 1. Stock DRIP working end to end for at least one coin on mainnet, with a revoke button and a run log with three signatures. This is the headline.
 2. Live mainnet demo: paste any wallet, see stock dividends with proof links, including every DRIP run.
@@ -65,7 +65,7 @@ Hundreds of thousands of wallets are accumulating tokenized stock through meme c
 - No charts, limit orders, or trading.
 - No subscription. Owner rule.
 - No tax or investment advice. "Payouts" and "dividends received", never "yield" or "APR" in the UI.
-- Cut for the submission (2026-09-12): eligibility badge (F4), calculator (F5), Telegram digest (F6). Revisit after Sep 18.
+- Cut for the submission (2026-09-12): eligibility badge (F4), calculator (F5), Telegram digest (F6). Revisit after Sep 25.
 
 ## 4. Users and jobs
 
@@ -205,7 +205,7 @@ watches(chat_id, wallet, coin_id, mode text, created_at, last_ping_at)
 
 ## 11. Success metrics
 
-| By 2026-09-18                                                          | Target                                   |
+| By 2026-09-23                                                          | Target                                   |
 | ---------------------------------------------------------------------- | ---------------------------------------- |
 | Coins with verified distributor and live statements                    | 10, including TREE, DIVI, AGI, GP, KNOTS |
 | Wallets checked by real users before submission                        | 100                                      |
@@ -214,7 +214,7 @@ watches(chat_id, wallet, coin_id, mode text, created_at, last_ping_at)
 | Share cards posted publicly                                            | 10                                       |
 | Submission complete with repo, live demo, pitch video, technical video | 24 hours early                           |
 
-## 12. Build plan (7 days to 2026-09-18)
+## 12. Build plan (7 days to 2026-09-18, then the extension to 2026-09-25)
 
 | Day | Date   | Deliverable                                                                                                                                 | Done when                                                              |
 | --- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
@@ -226,6 +226,9 @@ watches(chat_id, wallet, coin_id, mode text, created_at, last_ping_at)
 | 5   | Sep 16 | Portfolio view, polish, README and setup, security notes, classifier and keeper tests                                                       | A stranger can run it from the README; both tests pass                 |
 | 6   | Sep 17 | Pitch video (3 min), technical video (5 min), submission text; submit                                                                       | Submitted with all links                                               |
 | 7   | Sep 18 | Buffer. Fix what judges would hit first.                                                                                                    | Nothing left on the critical path                                      |
+| Ext | Sep 16 | Deadline extended to Sep 25. Five bounties added. PreStocks and Tessera targets shipped, third DRIP run into T-OpenAI                       | Entered: main, PreStocks, Tessera                                      |
+| Ext | Sep 23 | Submit with repo, live URL, both videos, `docs/SUBMISSION.md` text                                                                          | Submitted two days early                                               |
+| Ext | Sep 24 to 25 | Buffer. Edits allowed until close.                                                                                                     | Nothing left on the critical path                                      |
 
 No day goes to StonkFlow (decided 2026-09-13). The owner has Turbin3 coursework in parallel, so owner-side steps are batched.
 
@@ -255,7 +258,7 @@ Commit per working unit. Update `docs/CHECKPOINT.md` every session.
 | Distributor cannot be identified cleanly       | fallback "probable" classifier; show evidence in the technical video                             |
 | Keeper security concerns from judges           | capped delegation, three-signature logging, revoke path, disclosure; say it before they ask      |
 | Jupiter fills poorly on thin xStock pools      | route only to SPYx, QQQx, NVDAx, APPLx by default; show impact before approval                   |
-| Slawth ships stock targets before the deadline | our wedge remains the statement plus proof; DRIP into stocks is still first if shipped by Sep 18 |
+| Slawth ships stock targets before the deadline | our wedge remains the statement plus proof; DRIP into stocks is still first if shipped by Sep 25 |
 | Seven days is not enough                       | F4, F5, F6 are cut; portfolio view deferred; F1, F2, F3, F7 are the submission                   |
 | Helius free tier                               | on-demand indexing, caching, upgrade if needed for the demo week                                 |
 | Users read payouts as guaranteed               | volume assumption on screen, no yield or APR wording                                             |

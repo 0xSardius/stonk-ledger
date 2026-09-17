@@ -4,11 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Stonk Ledger: a Stocklana hackathon entry (Solana Foundation, deadline 2026-09-18). Paste a wallet, see every tokenized-stock payout it earned from StonkFun reward coins with a proof link per transaction, and turn any payout stream into a stock position with one approval (Stock DRIP).
+Stonk Ledger: a Stocklana hackathon entry (Solana Foundation; submissions close 2026-09-25 4 pm ET, extended on 2026-09-16 from Sep 18; target submit 2026-09-23). Paste a wallet, see every tokenized-stock payout it earned from StonkFun reward coins with a proof link per transaction, and turn any payout stream into a stock position with one approval (Stock DRIP).
 
 **Positioning (decided 2026-09-12):** Stock DRIP is the headline feature. The ledger is the plumbing DRIP needs and the proof that each run happened. Lead every pitch, README, and page with DRIP. Scoring is in `.superstack/entry-scoring.md`.
 
-**Current state (2026-09-14):** live at https://stonk-ledger.vercel.app. Statement, share card, DRIP (one mainnet run done), Helius webhook on the distributor, workers on GitHub Actions. Brand applied per `brand.md`. Next: proof feed per coin, ten coins verified, videos and submission. Read `docs/CHECKPOINT.md` first in every session; it holds the day-by-day status and blockers. `docs/PRD.md` v0.5 is the spec. `.superstack/idea-context.md` and `.superstack/build-context.md` are the phase handoffs.
+**Current state (2026-09-16):** live at https://stonk-ledger.vercel.app. Statement, share card, proof feed, DRIP (three mainnet runs, the third into a Tessera token), Helius webhook on the distributor, workers on GitHub Actions. Brand applied per `brand.md`. Entered for the main track plus the PreStocks and Tessera bounties. Next: `docs/SUBMISSION.md`, videos, submit by 2026-09-23. Read `docs/CHECKPOINT.md` first in every session; it holds the day-by-day status and blockers. `docs/PRD.md` v0.5 is the spec. `.superstack/idea-context.md` and `.superstack/build-context.md` are the phase handoffs.
 
 ## Commands
 
@@ -86,7 +86,7 @@ Key mints (from `.superstack/idea-context.md`): KNOTS `8RVBk8vxLiUHueLUW1f4izFVq
 - Show "Other {quote} received" separately from classified payouts so nothing looks hidden.
 - Prices older than the first snapshot use nearest daily close and are labelled "estimated" (`usd_estimated`).
 - Non-goals: no compounding back into the meme coin (link to Slawth), no APR leaderboard, no charts or trading, no subscription.
-- Cut from the submission: eligibility badge, calculator, Telegram bot. Do not build them before Sep 18. Portfolio view waits until Day 5.
+- Cut from the submission: eligibility badge, calculator, Telegram bot. Do not build them before the Sep 23 submission. Portfolio view waits until after it.
 - Brand direction: brokerage statement, not casino. Do not reuse StonkFun green.
 
 ## Skills to load
@@ -94,7 +94,7 @@ Key mints (from `.superstack/idea-context.md`): KNOTS `8RVBk8vxLiUHueLUW1f4izFVq
 - **`solana-dev`** before any wallet, signing, transaction, token-program, or `@solana/kit` work. It carries the current kit patterns, the Token-2022 notes, and the Solana MCP server for live docs. Do not write kit or wallet-standard code from memory.
 - **`integrating-jupiter`** before touching the Ultra order or execute calls.
 - **`frontend-design-guidelines`** and **`number-formatting`** while building any page. **`brand-design`** once, before the statement page.
-- **`railway-docs`** for the worker deploys. **`submit-to-hackathon`** on Day 6.
+- **`railway-docs`** for the worker deploys. **`submit-to-hackathon`** on submission day (target 2026-09-23).
 
 ## Working rules for this repo
 

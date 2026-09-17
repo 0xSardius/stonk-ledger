@@ -4,7 +4,7 @@ The receipt and the reinvestment for meme coins that pay dividends in tokenized 
 
 Paste a wallet, see every APPLx, STRCx, or SPYx payout it earned with a proof link per transaction. Turn any payout stream into a stock position with one approval: **Stock DRIP**.
 
-Built for the [Stocklana hackathon](https://hackathons.solana.com/hackathons/stocklana) by [0xsardius](https://github.com/0xSardius). Submissions close 2026-09-18.
+Built for the [Stocklana hackathon](https://hackathons.solana.com/hackathons/stocklana) by [0xsardius](https://github.com/0xSardius). Submissions close 2026-09-25.
 
 ## Live
 

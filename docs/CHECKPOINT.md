@@ -1,7 +1,7 @@
 # Checkpoint — Stonk Ledger
 
 **Last updated:** 2026-09-16
-**Phase:** Product complete and verified on production. Submission package not done. Deadline 2026-09-18; target submit 2026-09-17.
+**Phase:** Product complete and verified on production, entered for main track + PreStocks + Tessera. Submission package not done. Submissions close 2026-09-25 4 pm ET; target submit 2026-09-23.
 
 ## Resume here (next session)
 
@@ -20,7 +20,7 @@ Verified from the page payload at hackathons.solana.com/hackathons/stocklana:
 - **Five bounties.** Meteora DBC $5k (no fit, we do not touch DBC). Clawpump agent $5k (no fit, requires launching a token). PreStocks $5k (strong fit: 300 seeded coins pay in PreStocks tokens, 5,834 attributed payouts to 2,476 wallets already in the ledger, AGI alone 4,281 payouts to 2,053 wallets). Tessera $6k (fit if T-OpenAI, T-Kalshi, T-SpaceX become DRIP targets; no StonkFun coin pays in them). Pyth market data (prize is 3 months of Pyth Pro, judged on how central Pyth is; we price with Jupiter today).
 - **Sponsor tokens are DRIP-ready with config only:** all Tessera and PreStocks mints are Token-2022, 9 decimals, priced on Jupiter Price v3 with $85k to $575k liquidity, and Ultra dry-runs route STONK into T-OpenAI and into ANTHROPIC (PreStocks). `lib/drip/run.ts` already assumes Token-2022 targets. Coverage query: `pnpm tsx scripts/research/sponsor-coverage.ts`.
 
-**Locked in (2026-09-16, late):** main track + PreStocks bounty + Tessera bounty. Commit `8da22be` adds eleven targets (8 PreStocks, 3 Tessera) grouped by issuer on `/drip`, with `tests/drip-targets.test.ts` checking mints and decimals against captured issuer API fixtures. **Third mainnet DRIP run, first into a Tessera token, verified on production:** 0.190898 STONK → 0.000040159 T-OpenAI. Signatures (all finalized, no error): transfer `2LCk6GmQsRgrzgm23e5BVk3G1mjEoTix53Ks9DNcQBMtBFLM8b1d1Xr4kFFsH3TgDWgb8NZY9EpeE7HZSbpmetqL`, swap `5oVGhEkAsdYQ8zKuQ1TibZuREMMSE5N9WRzirLfLgEh428DQvVUXufFRkAYxk6fBGmaS4Z3m84XYtZAtGq55aVCx`, return `2n9CJzL8N3QKB55YsfWo5Wxf6tWMXXpge6quGB3ANEKvDBc7ucyCLHRDEtiNG4Y5HmoX5HjRqFuDaH9WVQaZmpmu`. The second run (Sep 15, 0.297514 STONK → 0.00008045 SPYx, swap `5LMuaRP8ErWXqAW2VFsnNz2T8WHm8yFJvgxyhKtFGGpUtv4d8y4v45CazDtYZFWVDpzyGgRYvcad7x39dnjX9jBy`) was made unattended by the GitHub Actions keeper. The test row was retargeted with `scripts/set-delegation-target.ts` (threshold now $0.02); its cap is fully used, so the owner must Raise cap on `/drip` before another run. Not done: Pyth (see the re-check note above), deadline references in README/PRD/CLAUDE.md still say Sep 18.
+**Locked in (2026-09-16, late):** main track + PreStocks bounty + Tessera bounty. Commit `8da22be` adds eleven targets (8 PreStocks, 3 Tessera) grouped by issuer on `/drip`, with `tests/drip-targets.test.ts` checking mints and decimals against captured issuer API fixtures. **Third mainnet DRIP run, first into a Tessera token, verified on production:** 0.190898 STONK → 0.000040159 T-OpenAI. Signatures (all finalized, no error): transfer `2LCk6GmQsRgrzgm23e5BVk3G1mjEoTix53Ks9DNcQBMtBFLM8b1d1Xr4kFFsH3TgDWgb8NZY9EpeE7HZSbpmetqL`, swap `5oVGhEkAsdYQ8zKuQ1TibZuREMMSE5N9WRzirLfLgEh428DQvVUXufFRkAYxk6fBGmaS4Z3m84XYtZAtGq55aVCx`, return `2n9CJzL8N3QKB55YsfWo5Wxf6tWMXXpge6quGB3ANEKvDBc7ucyCLHRDEtiNG4Y5HmoX5HjRqFuDaH9WVQaZmpmu`. The second run (Sep 15, 0.297514 STONK → 0.00008045 SPYx, swap `5LMuaRP8ErWXqAW2VFsnNz2T8WHm8yFJvgxyhKtFGGpUtv4d8y4v45CazDtYZFWVDpzyGgRYvcad7x39dnjX9jBy`) was made unattended by the GitHub Actions keeper. The test row was retargeted with `scripts/set-delegation-target.ts` (threshold now $0.02); its cap is fully used, so the owner must Raise cap on `/drip` before another run. Not done: Pyth (see the re-check note above; Hermes price endpoint now returns 401 without a key). Deadline references updated to Sep 25 with a Sep 23 target across README, PRD, CLAUDE.md, and `.superstack/idea-context.md`.
 
 Submission checklist status: public MIT repo ✓, README five-minute setup ✓, `.env.example` ✓, seed script ✓, classifier fixture test ✓, keeper fixture test ✓, live mainnet demo ✓, registration ?, pitch video ✗, technical video ✗, description ✗.
 **Spec:** `docs/PRD.md` v0.5 (DRIP-first). Entry decision: `.superstack/entry-scoring.md`. Handoff: `.superstack/idea-context.md`, `.superstack/build-context.md`.
@@ -50,7 +50,7 @@ Submission checklist status: public MIT repo ✓, README five-minute setup ✓, 
 1. Owner: open the statement and `/drip` on a phone and report anything wrong.
 2. Confirm a scheduled Actions run fired (`gh run list --workflow=keeper.yml`).
 3. Second DRIP run happens on its own once pending payouts on the test wallet pass $0.05.
-4. Day 6: pitch video (3 min, product only, PRD 13), technical video (5 min: classifier evidence, keeper design, `docs/SECURITY.md`, webhook, schema), submission text, submit 24 hours early.
+4. By 2026-09-23: pitch video (3 min, product only, PRD 13), technical video (5 min: classifier evidence, keeper design, `docs/SECURITY.md`, webhook, schema), submission text, submit two days early.
 5. After the hackathon: merge candidates by quote mint on `/drip`, daily-close backfill for USD at receipt, portfolio totals across coins on the statement header (partially there).
 
 ## Decisions and rules that apply throughout
