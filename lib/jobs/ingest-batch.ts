@@ -113,13 +113,76 @@ async function attribute(batch: ParsedBatch): Promise<number | null> {
   return votes[0]?.coinId ?? null;
 }
 
+export type BatchInsert = typeof schema.payoutBatches.$inferInsert;
+
+/** Pure: the one feed row for a parsed batch. */
+export function toBatchRow(b: ParsedBatch, coinId: number | null): BatchInsert {
+  return {
+    sig: b.rows[0].sig,
+    quoteMint: b.quoteMint,
+    coinId,
+    blockTime: b.rows[0].blockTime,
+    recipients: b.rows.length,
+    amount: b.rows.reduce((a, r) => a + Number(r.amount), 0).toString(),
+    usdAtReceipt: null,
+  };
+}
+
+/** Pure: keep only recipients whose full history we store. */
+export function trackedRows<T extends { wallet: string }>(
+  rows: T[],
+  tracked: ReadonlySet<string>
+): T[] {
+  return rows.filter((r) => tracked.has(r.wallet));
+}
+
+let trackedCache: { at: number; set: Set<string> } | null = null;
+
+/**
+ * Wallets whose per-recipient rows we keep: every wallet someone viewed
+ * (`wallets`) plus every wallet with a delegation. Cached one minute.
+ */
+export async function trackedWallets(force = false) {
+  if (!force && trackedCache && Date.now() - trackedCache.at < 60_000)
+    return trackedCache.set;
+  const d = db();
+  const [viewed, delegated] = await Promise.all([
+    d.select({ w: schema.wallets.address }).from(schema.wallets),
+    d
+      .select({ w: schema.dripDelegations.wallet })
+      .from(schema.dripDelegations),
+  ]);
+  trackedCache = {
+    at: Date.now(),
+    set: new Set([...viewed, ...delegated].map((r) => r.w)),
+  };
+  return trackedCache.set;
+}
+
+/**
+ * Store one `payout_batches` row per batch (for the feed) and per-recipient
+ * `payouts` rows only for tracked wallets. Storing every recipient filled the
+ * database in three days.
+ */
 export async function ingestBatch(tx: ParsedTx) {
   const { coinsByQuote, distributors } = await coinIndex();
   const batches = parseBatch(tx, coinsByQuote, distributors);
+  if (batches.length === 0) return { batches: 0, inserted: 0 };
+  const tracked = await trackedWallets();
   let inserted = 0;
   for (const b of batches) {
     const coinId = await attribute(b);
-    const rows: PayoutInsert[] = b.rows.map((r) => ({ ...r, coinId }));
+    const batchRow = toBatchRow(b, coinId);
+    await attachUsdAtReceipt([batchRow], b.quoteMint);
+    await db()
+      .insert(schema.payoutBatches)
+      .values(batchRow)
+      .onConflictDoNothing();
+    const rows: PayoutInsert[] = trackedRows(b.rows, tracked).map((r) => ({
+      ...r,
+      coinId,
+    }));
+    if (rows.length === 0) continue;
     await attachUsdAtReceipt(rows, b.quoteMint);
     const res = await db()
       .insert(schema.payouts)

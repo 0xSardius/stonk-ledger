@@ -69,6 +69,31 @@ export const payouts = pgTable(
   ]
 );
 
+/**
+ * One row per distributor batch (transaction x quote mint). Feeds the proof
+ * feed and coin totals. `payouts` keeps per-recipient rows only for wallets
+ * someone viewed or delegated; storing every recipient filled the database
+ * in three days (2026-09-16).
+ */
+export const payoutBatches = pgTable(
+  "payout_batches",
+  {
+    sig: text("sig").notNull(),
+    quoteMint: text("quote_mint").notNull(),
+    /** Null until a viewed wallet's rows resolve which coin paid this batch. */
+    coinId: integer("coin_id").references(() => coins.id),
+    blockTime: timestamp("block_time", { withTimezone: true }).notNull(),
+    recipients: integer("recipients").notNull(),
+    amount: numeric("amount").notNull(),
+    usdAtReceipt: numeric("usd_at_receipt"),
+  },
+  (t) => [
+    primaryKey({ columns: [t.sig, t.quoteMint] }),
+    index("payout_batches_coin_time_idx").on(t.coinId, t.blockTime),
+    index("payout_batches_quote_time_idx").on(t.quoteMint, t.blockTime),
+  ]
+);
+
 export const priceSnapshots = pgTable(
   "price_snapshots",
   {

@@ -62,6 +62,12 @@ export async function POST(req: Request) {
   if (!check.ok)
     return NextResponse.json({ error: check.reason }, { status: 409 });
 
+  // a delegated wallet is tracked: the webhook stores its payout rows from now on
+  await db()
+    .insert(schema.wallets)
+    .values({ address: b.wallet })
+    .onConflictDoNothing();
+
   const row = {
     wallet: b.wallet,
     coinId: b.coinId,

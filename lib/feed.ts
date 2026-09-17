@@ -65,42 +65,37 @@ export async function getCoinFeed(
   if (!c) return null;
 
   const since24h = new Date(Date.now() - 86400_000);
+  const pb = schema.payoutBatches;
   const [agg] = await d
     .select({
-      batches: sql<number>`count(distinct ${schema.payouts.sig})::int`,
-      payouts: sql<number>`count(*)::int`,
-      amount: sql<string>`coalesce(sum(${schema.payouts.amount}),0)::text`,
-      first: sql<Date | null>`min(${schema.payouts.blockTime})`,
-      last: sql<Date | null>`max(${schema.payouts.blockTime})`,
+      batches: sql<number>`count(*)::int`,
+      payouts: sql<number>`coalesce(sum(${pb.recipients}),0)::int`,
+      amount: sql<string>`coalesce(sum(${pb.amount}),0)::text`,
+      first: sql<Date | null>`min(${pb.blockTime})`,
+      last: sql<Date | null>`max(${pb.blockTime})`,
     })
-    .from(schema.payouts)
-    .where(eq(schema.payouts.coinId, c.id));
+    .from(pb)
+    .where(eq(pb.coinId, c.id));
   const [agg24] = await d
     .select({
-      batches: sql<number>`count(distinct ${schema.payouts.sig})::int`,
-      amount: sql<string>`coalesce(sum(${schema.payouts.amount}),0)::text`,
-      recipients: sql<number>`count(distinct ${schema.payouts.wallet})::int`,
+      batches: sql<number>`count(*)::int`,
+      amount: sql<string>`coalesce(sum(${pb.amount}),0)::text`,
+      recipients: sql<number>`coalesce(sum(${pb.recipients}),0)::int`,
     })
-    .from(schema.payouts)
-    .where(
-      and(
-        eq(schema.payouts.coinId, c.id),
-        gte(schema.payouts.blockTime, since24h)
-      )
-    );
+    .from(pb)
+    .where(and(eq(pb.coinId, c.id), gte(pb.blockTime, since24h)));
 
   const batches = await d
     .select({
-      sig: schema.payouts.sig,
-      blockTime: sql<Date>`min(${schema.payouts.blockTime})`,
-      recipients: sql<number>`count(*)::int`,
-      amount: sql<string>`sum(${schema.payouts.amount})::text`,
-      usd: sql<string | null>`sum(${schema.payouts.usdAtReceipt})::text`,
+      sig: pb.sig,
+      blockTime: pb.blockTime,
+      recipients: pb.recipients,
+      amount: sql<string>`${pb.amount}::text`,
+      usd: sql<string | null>`${pb.usdAtReceipt}::text`,
     })
-    .from(schema.payouts)
-    .where(eq(schema.payouts.coinId, c.id))
-    .groupBy(schema.payouts.sig)
-    .orderBy(desc(sql`min(${schema.payouts.blockTime})`))
+    .from(pb)
+    .where(eq(pb.coinId, c.id))
+    .orderBy(desc(pb.blockTime))
     .limit(limit);
 
   const [snap] = await d
@@ -201,8 +196,8 @@ export async function listCoins(
       quoteCategory: schema.coins.quoteCategory,
       marketCapUsd: schema.coins.marketCapUsd,
       volume24hUsd: schema.coins.volume24hUsd,
-      payoutsStored: sql<number>`(select count(*)::int from payouts p where p.coin_id = ${schema.coins.id})`,
-      lastPayout: sql<Date | null>`(select max(block_time) from payouts p where p.coin_id = ${schema.coins.id})`,
+      payoutsStored: sql<number>`(select coalesce(sum(recipients),0)::int from payout_batches b where b.coin_id = ${schema.coins.id})`,
+      lastPayout: sql<Date | null>`(select max(block_time) from payout_batches b where b.coin_id = ${schema.coins.id})`,
     })
     .from(schema.coins)
     .where(

@@ -164,6 +164,20 @@ export async function indexWallet(
           sql`${schema.payouts.coinId} is null`
         )
       );
+    // a clear attribution for this wallet also resolves the feed rows of the
+    // batches it was paid in
+    if (!ambiguous) {
+      await d
+        .update(schema.payoutBatches)
+        .set({ coinId: target.id })
+        .where(
+          and(
+            eq(schema.payoutBatches.quoteMint, quoteMint),
+            sql`${schema.payoutBatches.coinId} is null`,
+            sql`${schema.payoutBatches.sig} in (select sig from payouts where wallet = ${wallet} and coin_id = ${target.id})`
+          )
+        );
+    }
     summary.coins.push(entry);
     summary.newPayouts += entry.newPayouts;
   }
@@ -184,10 +198,14 @@ export async function indexWallet(
  * Older payouts stay null until a daily-close backfill exists (PRD 8.3),
  * and are then labelled "estimated".
  */
-export async function attachUsdAtReceipt(
-  rows: (typeof schema.payouts.$inferInsert)[],
-  quoteMint: string
-) {
+export async function attachUsdAtReceipt<
+  T extends {
+    amount: string;
+    blockTime: Date;
+    usdAtReceipt?: string | null;
+    usdEstimated?: boolean;
+  },
+>(rows: T[], quoteMint: string) {
   const times = rows.map((r) => r.blockTime.getTime());
   const lo = new Date(Math.min(...times) - 2 * 3600_000);
   const hi = new Date(Math.max(...times) + 2 * 3600_000);
