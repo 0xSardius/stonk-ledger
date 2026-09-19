@@ -22,7 +22,7 @@ Built for the [Stocklana hackathon](https://hackathons.solana.com/hackathons/sto
 
 ## What it does
 
-**The receipt.** StonkFun reward coins pay a 3% transfer tax to holders in the coin's quote asset. Thousands are quoted in tokenized stocks. Stonk Ledger classifies every inbound quote transfer signed by the platform's distributor as a payout, values it at receipt and today, and links each one to Solscan. Fresh payouts arrive through a Helius webhook on the distributor address, so the ledger sees every batch for every holder the moment it lands.
+**The receipt.** StonkFun reward coins pay a 3% transfer tax to holders in the coin's quote asset. Thousands are quoted in tokenized stocks. Stonk Ledger classifies every inbound quote transfer signed by the platform's distributor as a payout, values it at receipt and today, and links each one to Solscan. A scheduled job pulls the distributor's new batches every ten minutes for the proof feed, and a wallet's own history is indexed from chain the first time its statement is viewed.
 
 **The reinvestment.** A holder approves the keeper as a capped delegate on their quote token account. Every ten minutes the keeper sweeps payouts that arrived after the approval, swaps them on Jupiter Ultra into the stock the holder chose (SPYx by default), and sends the stock back, keeping 1% as the fee. Three signatures per run, all on the statement. Revoke is one transaction.
 
@@ -64,7 +64,7 @@ pnpm test -- tests/drip-run.test.ts  # keeper decision path against mainnet fixt
 
 ## Stack
 
-Next.js 16, React 19, TypeScript, Tailwind 4, shadcn/ui, `@solana/kit` 7 with `@solana/react` and the kit wallet plugin, Postgres on Neon via Drizzle, Helius (RPC, enhanced transactions, webhooks), Jupiter (Price v3, Ultra), Vitest.
+Next.js 16, React 19, TypeScript, Tailwind 4, shadcn/ui, `@solana/kit` 7 with `@solana/react` and the kit wallet plugin, Postgres on Neon via Drizzle, Helius (RPC, enhanced transactions), Jupiter (Price v3, Ultra), Vitest.
 
 ## Docs
 

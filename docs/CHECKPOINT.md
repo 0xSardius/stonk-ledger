@@ -1,15 +1,13 @@
 # Checkpoint — Stonk Ledger
 
-**Last updated:** 2026-09-16
-**Phase:** Product complete and verified on production, entered for main track + PreStocks + Tessera. Submission package not done. Submissions close 2026-09-25 4 pm ET; target submit 2026-09-23.
+**Last updated:** 2026-09-19
+**Phase:** Product complete and verified on production, entered for main track + PreStocks + Tessera. Submission package drafted in `docs/SUBMISSION.md`; videos and form not done. Submissions close 2026-09-25 4 pm ET; target submit 2026-09-23.
 
 ## Resume here (next session)
 
-Product is ready to submit; the gap is the package. In this order:
+Product is ready to submit; `docs/SUBMISSION.md` holds the description, both video scripts, and the form checklist. Everything left is owner-side; see "Remaining" below. Claude's job on resume: confirm the four scheduled jobs are still green (`gh run list --limit 8`), confirm `/api/health` responds, and help with anything the phone check or the recording turns up.
 
-1. **Claude, first thing:** draft `docs/SUBMISSION.md` with (a) the submission description (opening line from PRD 13: "Thousands of Solana meme coins now pay dividends in tokenized stocks. Stonk Ledger is the receipt and the reinvestment..."), (b) the 3-minute pitch script with exact wallets and clicks in PRD 13 order (TREE holder `4di7dpumucn9xr3Wt2SpMxP1kjpX7iM8KhgtnhCLPoVa` statement, proof link, owner wallet `88tvtBFWdb814MGm2PoGXXDqpEvntpxEwC8ayhbbJoN` on `/drip` with the three signatures, `/coins`, share card), (c) the 5-minute technical script keyed to `docs/RESEARCH.md` (distributor evidence, holder distribution), `docs/SECURITY.md` (keeper trust model), the webhook, the schema, and the two fixture tests. Name the three risks honestly: scheduled keeper with a 5-minute cron floor, shared delegation when two coins pay the same stock, estimated USD at receipt before Sep 13.
-2. **Owner:** register on hackathons.solana.com if not done; open the statement and `/drip` on a phone and report anything wrong (375px never verified by Claude); record both videos from the scripts; submit with repo, live URL, videos.
-3. Optional if time: post one statement link on X to check the share-card unfurl; a second DRIP run lands by itself when the test wallet's pending payouts pass $0.05.
+Optional if time: post one statement link on X to check the share-card unfurl.
 
 ### Hackathon page re-check (2026-09-16, evening)
 
@@ -49,8 +47,8 @@ Submission checklist status: public MIT repo ✓, README five-minute setup ✓, 
 
 ## Live and verified against production
 
-- **https://stonk-ledger.vercel.app** (Vercel project `0xsardius-projects/stonk-ledger`, GitHub repo connected, pushes to `main` deploy). Production env: `DATABASE_URL`, `HELIUS_API_KEY`, `HELIUS_WEBHOOK_SECRET`, `DRIP_KEEPER_SECRET_KEY`, `NEXT_PUBLIC_APP_URL`.
-- Routes verified 2026-09-14 by curl and by Chrome screenshots: `/`, `/wallet/[address]`, `/drip`, `/coins`, `/coin/[mint]` (top ten coins by volume render from config), `/api/og/[address]` (1200x630 PNG), `/api/wallet/[address]`, `/api/feed/[mint]`, `/api/health` (1,200 coins), `/api/rpc` (allow-listed relay), `/api/webhooks/helius` (403 without the secret).
+- **https://stonk-ledger.vercel.app** (Vercel project `0xsardius-projects/stonk-ledger`, GitHub repo connected, pushes to `main` deploy). Production env: `DATABASE_URL`, `HELIUS_API_KEY`, `DRIP_KEEPER_SECRET_KEY`, `NEXT_PUBLIC_APP_URL` (`HELIUS_WEBHOOK_SECRET` still set on Vercel but unused since 2026-09-17; owner may delete).
+- Routes verified 2026-09-14 by curl and by Chrome screenshots: `/`, `/wallet/[address]`, `/drip`, `/coins`, `/coin/[mint]` (top ten coins by volume render from config), `/api/og/[address]` (1200x630 PNG), `/api/wallet/[address]`, `/api/feed/[mint]`, `/api/health` (1,200 coins then; 4,961 on 2026-09-19), `/api/rpc` (allow-listed relay). The webhook route was removed on 2026-09-17.
 - **Helius webhook** registered on the distributor `5KXDF6QnqhBj72hDtJNkkpFaQVUfbFXNybMsp3DiK6tD`, active. Delivered 7,456 payout rows across 417 batches and 15 coins in its first 30 minutes.
 - **Workers on GitHub Actions**, one cron per workflow (`.github/workflows/prices.yml` every 5 min, `keeper.yml` every 10 min, `rewards.yml` hourly), repo secrets set. **Verified:** scheduled runs fire on their own (prices and keeper 21:54 UTC, rewards 22:30 UTC on 2026-09-14, all success). The earlier combined multi-cron workflow never fired; one cron per file is the shape that works.
 - **Journey fixes (Sep 14, evening), verified on production:** home says no connection is needed for a statement and links to Coins; the statement's DRIP link says it needs the wallet connected; `/drip` shows "pending since approval" with the USD value and whether the next keeper pass will sweep, plus a "Your statement" link. Test wallet shows 0.153 STONK ($0.03) pending against the $0.05 test threshold.
@@ -68,11 +66,26 @@ Submission checklist status: public MIT repo ✓, README five-minute setup ✓, 
 
 ## Remaining
 
-1. Owner: open the statement and `/drip` on a phone and report anything wrong.
-2. Confirm a scheduled Actions run fired (`gh run list --workflow=keeper.yml`).
-3. Second DRIP run happens on its own once pending payouts on the test wallet pass $0.05.
-4. By 2026-09-23: pitch video (3 min, product only, PRD 13), technical video (5 min: classifier evidence, keeper design, `docs/SECURITY.md`, webhook, schema), submission text, submit two days early.
-5. After the hackathon: merge candidates by quote mint on `/drip`, daily-close backfill for USD at receipt, portfolio totals across coins on the statement header (partially there).
+1. Owner: re-approve DRIP on `/drip` with the test wallet `88tvtBFW…` (the old delegation closed when its cap was consumed).
+2. Owner: register on hackathons.solana.com.
+3. Owner: open the statement and `/drip` on a phone and report anything wrong (375px never verified).
+4. By 2026-09-23: pitch video (3 min) and technical video (5 min) from `docs/SUBMISSION.md`, submit with repo, live URL, videos, three tracks.
+5. Scheduled jobs verified on 2026-09-19: keeper, prices, rewards, daily all green; health 4,961 coins.
+
+## Post-hackathon candidates (decided 2026-09-19, none before submission)
+
+Carried over from earlier sessions:
+
+- Merge candidates by quote mint on `/drip`; daily-close backfill for USD at receipt; portfolio totals across coins on the statement header (partially there).
+- Option C ingestion (on-demand feed, no platform ingestion) if cost ever matters.
+- Pyth price feeds (Hermes needs a key now); fallback lookup for held coins that are not seeded.
+
+TypeSafe (Jev) judgments, in value order. The `typesafe@typesafe-ai` plugin is installed (skill `/typesafe:typesafe-ai`). Each needs a paid TypeSafe key held server-side and a cached result per coin so cost stays flat. Code keeps every rule, calculation, and money flow; the model only supplies understanding where the app now shows raw facts.
+
+1. **Coin trust signals.** Input: coin name, ticker, description plus observed state (payout regularity, holder count, days since last batch, ticker collision with an established coin). Three judgments: impersonating another coin, description matches chain behavior, likely abandoned. Output: one badge with reasons on `/coins` and the statement. Never ranks by return, so it stays inside the "no yield" rule. Highest value; no change to classifier, keeper, or trust model.
+2. **Plain-English DRIP policies.** Holder types a policy ("everything into SPYx, keep anything paid in Apple, skip payouts under $5"); Jev maps it to the typed fields the keeper already has (target per quote mint, threshold, exceptions); user reads the parsed policy back before signing. Keeper stays deterministic. Pays off once there are more than a handful of delegations.
+3. **Complete statement.** Sort the "Other received" bucket using the Helius description and source label into swap, wallet transfer, airdrop, or payout from an unindexed platform, with a probability; flag uncertain rows instead of guessing. Also reveals which other platforms pay dividends.
+4. **Ask the statement.** Text box that maps "how much did TREE pay me in August" to a typed query over existing tables. Cheapest; demo value mostly.
 
 ## Decisions and rules that apply throughout
 
