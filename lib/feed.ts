@@ -5,6 +5,7 @@
  */
 import { and, desc, eq, gte, inArray, sql } from "drizzle-orm";
 import { db, schema } from "./db";
+import { distributorSet } from "./distributors";
 import { displaySymbol } from "./format";
 import { JupiterPriceClient, currentMultiplier } from "./prices/jupiter";
 
@@ -143,7 +144,7 @@ export async function getCoinFeed(
       feeBps: c.feeBps,
       marketCapUsd: c.marketCapUsd != null ? Number(c.marketCapUsd) : null,
       volume24hUsd: c.volume24hUsd != null ? Number(c.volume24hUsd) : null,
-      distributorSigners: c.distributorSigners,
+      distributorSigners: Array.from(distributorSet(c.distributorSigners)),
     },
     quoteUsd,
     multiplier,

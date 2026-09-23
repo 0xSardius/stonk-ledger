@@ -14,6 +14,7 @@ import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { heldActiveCoins } from "./held-coins";
 import { db, schema } from "../db";
 import { classifyTx } from "../classify";
+import { distributorSet } from "../distributors";
 import { HeliusClient } from "../helius/client";
 
 export type IndexSummary = {
@@ -91,7 +92,7 @@ export async function indexWallet(
     const rule = {
       quoteMint,
       distributorSigners: Array.from(
-        new Set(group.flatMap((c) => c.distributorSigners))
+        distributorSet(group.flatMap((c) => c.distributorSigners))
       ),
     };
     const decimals =

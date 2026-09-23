@@ -113,17 +113,19 @@ export default async function CoinPage({ params }: Params) {
           </Stat>
         </dl>
         <p className="mt-4 text-xs text-muted-foreground">
-          Distributor{" "}
-          {coin.distributorSigners.map((s) => (
-            <a
-              key={s}
-              href={addressUrl(s)}
-              target="_blank"
-              rel="noreferrer"
-              className="font-mono text-primary underline underline-offset-2"
-            >
-              {truncateAddress(s, 6)}
-            </a>
+          {coin.distributorSigners.length > 1 ? "Distributors" : "Distributor"}{" "}
+          {coin.distributorSigners.map((s, i) => (
+            <span key={s}>
+              {i > 0 && ", "}
+              <a
+                href={addressUrl(s)}
+                target="_blank"
+                rel="noreferrer"
+                className="font-mono text-primary underline underline-offset-2"
+              >
+                {truncateAddress(s, 6)}
+              </a>
+            </span>
           ))}
           {" · "}coin{" "}
           <a

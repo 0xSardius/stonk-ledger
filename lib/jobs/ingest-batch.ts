@@ -11,6 +11,7 @@
 import { and, eq, inArray, isNotNull, sql } from "drizzle-orm";
 import { db, schema } from "../db";
 import { hasDexProgram } from "../classify";
+import { distributorSet } from "../distributors";
 import type { ParsedTx } from "../helius/client";
 import { attachUsdAtReceipt } from "./index-wallet";
 
@@ -87,7 +88,7 @@ export async function coinIndex(force = false) {
     .from(schema.coins)
     .where(eq(schema.coins.active, true));
   const coinsByQuote = new Map<string, Coin[]>();
-  const distributors = new Set<string>();
+  const distributors = distributorSet();
   for (const c of coins) {
     coinsByQuote.set(c.quoteMint, [
       ...(coinsByQuote.get(c.quoteMint) ?? []),

@@ -1,19 +1,20 @@
 /**
- * Scheduled pull of the distributor's recent transactions (replaces the
- * Helius webhook, 2026-09-17). Reads the platform wallet's enhanced history
- * newest first, runs each transaction through the same parser the webhook
- * used, and stops once a page reaches two minutes past the newest batch we
- * already hold. Inserts are on-conflict-do-nothing, so overlap is free.
+ * Scheduled pull of the distributors' recent transactions (replaces the
+ * Helius webhook, 2026-09-17). Reads each platform wallet's enhanced history
+ * newest first, runs each transaction through the batch parser, and stops
+ * once a page reaches two minutes past the newest batch we already hold, or
+ * at the page cap. Inserts are on-conflict-do-nothing, so overlap is free.
  *
- * Cost per run: about one Helius call per 100 distributor transactions, so
- * typically 3 to 10 calls every ten minutes. Nothing runs between passes.
+ * Coverage is a sample, not a full record: the platform sends well over
+ * 100k transactions a day, more than the Helius free tier can read. The feed
+ * says so. Cost per run: one Helius call per 100 transactions, capped at
+ * maxPages per distributor.
  */
 import { desc } from "drizzle-orm";
 import { db, schema } from "../db";
 import { HeliusClient } from "../helius/client";
+import { PLATFORM_DISTRIBUTORS } from "../distributors";
 import { ingestBatch } from "./ingest-batch";
-
-export const DISTRIBUTOR = "5KXDF6QnqhBj72hDtJNkkpFaQVUfbFXNybMsp3DiK6tD";
 /** Re-read this much history past the newest stored batch, for same-second ordering. */
 const OVERLAP_MS = 2 * 60_000;
 
@@ -51,27 +52,41 @@ export async function ingestDistributor(
     oldest: null,
     stoppedAtStored: false,
   };
-  let before: string | undefined;
-  while (s.pages < maxPages) {
-    const list = await helius.history(DISTRIBUTOR, { before, limit: 100 });
-    if (list.length === 0) break;
-    s.pages += 1;
-    for (const tx of list) {
-      s.txs += 1;
-      const r = await ingestBatch(tx);
-      s.batches += r.batches;
-      s.trackedRows += r.inserted;
+  // Each distributor gets its own page budget; the floor is shared because
+  // both walks are newest-first by block time.
+  let allStopped = true;
+  for (const wallet of PLATFORM_DISTRIBUTORS) {
+    let before: string | undefined;
+    let pages = 0;
+    let stopped = false;
+    while (pages < maxPages) {
+      const list = await helius.history(wallet, { before, limit: 100 });
+      if (list.length === 0) {
+        stopped = true;
+        break;
+      }
+      pages += 1;
+      s.pages += 1;
+      for (const tx of list) {
+        s.txs += 1;
+        const r = await ingestBatch(tx);
+        s.batches += r.batches;
+        s.trackedRows += r.inserted;
+      }
+      const last = list[list.length - 1];
+      const oldest = new Date(last.timestamp * 1000).toISOString();
+      if (!s.oldest || oldest > s.oldest) s.oldest = oldest;
+      before = last.signature;
+      opts.log?.(
+        `${wallet.slice(0, 5)} page ${pages}: ${s.txs} txs, ${s.batches} batches, ${s.trackedRows} tracked rows, back to ${oldest}`
+      );
+      if (floor != null && last.timestamp * 1000 < floor) {
+        stopped = true;
+        break;
+      }
     }
-    const last = list[list.length - 1];
-    s.oldest = new Date(last.timestamp * 1000).toISOString();
-    before = last.signature;
-    opts.log?.(
-      `page ${s.pages}: ${s.txs} txs, ${s.batches} batches, ${s.trackedRows} tracked rows, back to ${s.oldest}`
-    );
-    if (floor != null && last.timestamp * 1000 < floor) {
-      s.stoppedAtStored = true;
-      break;
-    }
+    allStopped &&= stopped;
   }
+  s.stoppedAtStored = allStopped;
   return s;
 }

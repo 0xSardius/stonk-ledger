@@ -106,6 +106,26 @@ Reading:
 
 When a wallet holds two coins paid in the same quote (the KNOTS whale also holds DEX, paid in STONK), DRIP delegations are per (wallet, quote mint) and the keeper only sweeps payouts attributed to the chosen coin. The status page shows both coins as candidates. Fine for the demo; merge candidates by quote mint after the hackathon.
 
+## Second distributor (found 2026-09-22)
+
+Since about 2026-09-20 06:30 UTC, StonkFun pays most batches from a second wallet, `HuBMeYW3aDn8BH65fo8xxbP4oiexyup8udzKyccgi8Ga`. Fees come from rotating wallets (`643XFm2m…`, `9pbJYCVG…`).
+
+Evidence, read at 2026-09-23 00:13 UTC:
+
+- **HuBMe…:** the latest 100 transactions span 41 seconds. They contain 1,449 outbound transfers across quote mints, including STONK, BONK and xStocks. That is about 14.5 recipients per transaction.
+- **5KXDF…:** the latest 100 transactions contain only 44 outbound transfers, one per mint.
+- **Funding transfers:** fixture `helius-distributor-funding.json` shows 5KXDF… paying the fee and sending a quote token to HuBMe…. So 5KXDF… now funds the new wallet.
+- **Owner test wallet `88tv…`:** every KNOTS payout since Sep 20 06:33 came from HuBMe…. These payouts were labelled `probable` because the classifier knew only 5KXDF….
+
+Effects before the fix:
+
+- The scheduled pull read only 5KXDF…, so the proof feed missed almost every batch after Sep 20.
+- The funding transfers to HuBMe… were stored as one-recipient batches. About 5,500 rows, most with no coin.
+
+Fix: `lib/distributors.ts` holds both wallets as one platform list. The classifier, the batch parser and the scheduled pull all read it. Regression test: `tests/second-distributor.test.ts`.
+
+Volume note: HuBMe… alone sends about 100 transactions every 40 seconds, well over 100k a day. That is more than the Helius free tier can read, so the proof feed is a recent sample, not a complete record.
+
 ## Not yet answered
 
 - Whether coin minimums are enforced on chain (PRD open question 2).
