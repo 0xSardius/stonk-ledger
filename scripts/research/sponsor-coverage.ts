@@ -1,18 +1,12 @@
 /**
  * Stocklana sponsor-track coverage: how much of the ledger already touches
- * PreStocks-paid and Tessera-paid coins. Read-only. Written 2026-09-16 when
- * the hackathon page added five bounty tracks.
+ * PreStocks-paid coins. Read-only. Written 2026-09-16 when the hackathon page
+ * added five bounty tracks; the entry is main track plus PreStocks.
  *
  *   pnpm tsx scripts/research/sponsor-coverage.ts
  */
 import { sql } from "drizzle-orm";
 import { db } from "../../lib/db";
-
-const TESSERA = [
-  "oPAiAikWTaFj9RYoRFD35ccfwhnMcB3ThgBZRHSkjTZ", // T-OpenAI
-  "TKLSidmLVt3cqGaaodG8tyRzoANfQwoh67AccjmubeZ", // T-Kalshi
-  "TSPXcLV76s6V2zDiZQ18kBfcbnjaE2ZzNT3ga2Pd99v", // T-SpaceX
-];
 
 async function main() {
   const d = db();
@@ -36,14 +30,6 @@ async function main() {
     where c.quote_category = 'prestock'
     group by c.id order by payouts desc, vol desc nulls last limit 8`);
   console.log("top prestock-paid coins", topPre.rows);
-
-  const tessera = await d.execute(sql`
-    select symbol, quote_symbol, quote_category, quote_mint, volume_24h_usd::float as vol
-    from coins where quote_mint in (${sql.join(
-      TESSERA.map((m) => sql`${m}`),
-      sql`, `
-    )}) order by vol desc nulls last`);
-  console.log("coins paying in Tessera tokens", tessera.rows);
 
   const preQuotes = await d.execute(sql`
     select quote_symbol, quote_mint, count(*)::int as coins

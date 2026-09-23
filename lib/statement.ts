@@ -12,7 +12,7 @@ import { JupiterPriceClient, currentMultiplier } from "./prices/jupiter";
 import { findTarget } from "./drip/targets";
 import { runStatus, type RunStatus } from "./drip/plan";
 import { heldActiveCoins } from "./jobs/held-coins";
-import { displaySymbol } from "./format";
+import { displaySymbol, truncateAddress } from "./format";
 
 const STALE_MS = 10 * 60_000;
 const ROWS_PER_COIN = 60;
@@ -302,7 +302,8 @@ export async function getStatement(
       coinById.get(r.coinId)?.quoteSymbol ?? "?",
       coinById.get(r.coinId)?.quoteCategory
     ),
-    targetSymbol: findTarget(r.outMint)?.symbol ?? "?",
+    // a target no longer offered still shows which token the run bought
+    targetSymbol: findTarget(r.outMint)?.symbol ?? truncateAddress(r.outMint),
     inAmount: Number(r.inAmount),
     outAmount: r.outAmount != null ? Number(r.outAmount) : null,
     feeAmount: r.feeAmount != null ? Number(r.feeAmount) : null,

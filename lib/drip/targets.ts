@@ -1,20 +1,20 @@
 /**
- * Stock DRIP targets. Three issuers:
+ * Stock DRIP targets. Two issuers:
  *
  * - xStocks (Backed): Token-2022, 8 decimals. Deep pools first (PRD section 14
  *   risk: thin pools fill badly). Mints verified against the seeded StonkFun
  *   quote list 2026-09-13.
  * - PreStocks (pre-IPO, SPV-backed): Token-2022, 9 decimals. Mints from
  *   https://prestocks.com/api/prestocks on 2026-09-16; these are also quote
- *   mints of 300 seeded StonkFun coins.
- * - Tessera (pre-IPO T-Tokens): Token-2022, 9 decimals. Mints from
- *   https://rest-api.tessera.pe/v1/public/token-details on 2026-09-16.
+ *   mints of StonkFun coins.
  *
- * Every mint here was priced on Jupiter Price v3 with at least $85k of
- * liquidity on 2026-09-16, and Ultra dry-runs routed STONK into T-OpenAI and
- * ANTHROPIC. The keeper (lib/drip/run.ts) treats every target as Token-2022.
+ * PreStocks is the only pre-IPO issuer. Tessera targets were removed on
+ * 2026-09-23: the PreStocks bounty excludes projects that integrate any other
+ * pre-IPO token. Every mint here was priced on Jupiter Price v3 with at least
+ * $85k of liquidity on 2026-09-16, and an Ultra dry-run routed STONK into
+ * ANTHROPIC. The keeper treats every target as Token-2022.
  */
-export type DripIssuer = "xStocks" | "PreStocks" | "Tessera";
+export type DripIssuer = "xStocks" | "PreStocks";
 
 export type DripTarget = {
   symbol: string;
@@ -27,7 +27,6 @@ export type DripTarget = {
 export const DRIP_ISSUERS: { id: DripIssuer; label: string; note: string }[] = [
   { id: "xStocks", label: "Public stocks", note: "xStocks by Backed" },
   { id: "PreStocks", label: "Pre-IPO", note: "PreStocks" },
-  { id: "Tessera", label: "Pre-IPO", note: "Tessera T-Tokens" },
 ];
 
 const XSTOCKS: DripTarget[] = [
@@ -141,35 +140,7 @@ const PRESTOCKS: DripTarget[] = [
   },
 ];
 
-const TESSERA: DripTarget[] = [
-  {
-    symbol: "T-OpenAI",
-    name: "OpenAI (Tessera)",
-    mint: "oPAiAikWTaFj9RYoRFD35ccfwhnMcB3ThgBZRHSkjTZ",
-    decimals: 9,
-    issuer: "Tessera",
-  },
-  {
-    symbol: "T-Kalshi",
-    name: "Kalshi (Tessera)",
-    mint: "TKLSidmLVt3cqGaaodG8tyRzoANfQwoh67AccjmubeZ",
-    decimals: 9,
-    issuer: "Tessera",
-  },
-  {
-    symbol: "T-SpaceX",
-    name: "SpaceX (Tessera)",
-    mint: "TSPXcLV76s6V2zDiZQ18kBfcbnjaE2ZzNT3ga2Pd99v",
-    decimals: 9,
-    issuer: "Tessera",
-  },
-];
-
-export const DRIP_TARGETS: DripTarget[] = [
-  ...XSTOCKS,
-  ...PRESTOCKS,
-  ...TESSERA,
-];
+export const DRIP_TARGETS: DripTarget[] = [...XSTOCKS, ...PRESTOCKS];
 
 export const DEFAULT_TARGET = DRIP_TARGETS[0];
 

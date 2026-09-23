@@ -25,13 +25,12 @@ type Target = {
   name: string;
   mint: string;
   decimals: number;
-  issuer: "xStocks" | "PreStocks" | "Tessera";
+  issuer: "xStocks" | "PreStocks";
 };
 
 const ISSUER_GROUPS: { issuer: Target["issuer"]; label: string }[] = [
   { issuer: "xStocks", label: "Public stocks, xStocks" },
   { issuer: "PreStocks", label: "Pre-IPO, PreStocks" },
-  { issuer: "Tessera", label: "Pre-IPO, Tessera" },
 ];
 type Candidate = {
   coinId: number;

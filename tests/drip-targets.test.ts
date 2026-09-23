@@ -11,7 +11,6 @@ import { DRIP_TARGETS, findTarget, DEFAULT_TARGET } from "../lib/drip/targets";
 const load = <T>(name: string) =>
   JSON.parse(readFileSync(path.join(__dirname, "fixtures", name), "utf8")) as T;
 
-type TesseraToken = { symbol: string; mint: string };
 type PreStock = { symbol: string; contract_address: string };
 
 describe("DRIP targets", () => {
@@ -33,17 +32,6 @@ describe("DRIP targets", () => {
     expect(DEFAULT_TARGET.issuer).toBe("xStocks");
   });
 
-  test("Tessera mints match the Tessera token-details API", () => {
-    const api = load<TesseraToken[]>("tessera-token-details.json");
-    const ours = DRIP_TARGETS.filter((t) => t.issuer === "Tessera");
-    expect(ours.length).toBe(api.length);
-    for (const t of ours) {
-      const match = api.find((a) => a.mint === t.mint);
-      expect(match, `${t.symbol} not in Tessera API`).toBeDefined();
-      expect(match!.symbol).toBe(t.symbol);
-    }
-  });
-
   test("PreStocks mints match the PreStocks API", () => {
     const api = load<PreStock[]>("prestocks-list.json");
     const ours = DRIP_TARGETS.filter((t) => t.issuer === "PreStocks");
@@ -55,10 +43,23 @@ describe("DRIP targets", () => {
     }
   });
 
-  test("findTarget resolves a Tessera mint and rejects an unknown one", () => {
+  test("findTarget resolves a PreStocks mint and rejects an unknown one", () => {
     expect(
-      findTarget("oPAiAikWTaFj9RYoRFD35ccfwhnMcB3ThgBZRHSkjTZ")?.symbol
-    ).toBe("T-OpenAI");
+      findTarget("PreZad18qfPtbxNpMtMuAuX2zVpvkEU8DnJx56faCWd")?.issuer
+    ).toBe("PreStocks");
     expect(findTarget("11111111111111111111111111111111")).toBeNull();
+  });
+
+  test("PreStocks is the only pre-IPO issuer (PreStocks bounty rule)", () => {
+    expect(new Set(DRIP_TARGETS.map((t) => t.issuer))).toEqual(
+      new Set(["xStocks", "PreStocks"])
+    );
+    // Tessera T-Tokens, removed 2026-09-23
+    for (const mint of [
+      "oPAiAikWTaFj9RYoRFD35ccfwhnMcB3ThgBZRHSkjTZ",
+      "TKLSidmLVt3cqGaaodG8tyRzoANfQwoh67AccjmubeZ",
+      "TSPXcLV76s6V2zDiZQ18kBfcbnjaE2ZzNT3ga2Pd99v",
+    ])
+      expect(findTarget(mint)).toBeNull();
   });
 });
