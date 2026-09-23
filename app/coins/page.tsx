@@ -35,7 +35,8 @@ export default async function CoinsPage() {
         <p className="mt-3 max-w-xl text-sm text-muted-foreground">
           The most traded StonkFun reward coins by 24-hour volume. Each has a
           public proof feed of its distributions. Adding a coin is a config row;
-          nothing here is hand-picked.
+          nothing here is hand-picked. Recorded counts are a sample of the
+          distributors&apos; newest batches, read several times a day.
         </p>
       </header>
       <h2 className="mt-8 text-xs uppercase tracking-[0.08em] text-muted-foreground">
@@ -60,8 +61,8 @@ function CoinTable({ coins }: { coins: CoinListRow[] }) {
             <th className="py-2 font-normal">Pays</th>
             <th className="py-2 text-right font-normal">24h volume</th>
             <th className="py-2 text-right font-normal">Market cap</th>
-            <th className="py-2 text-right font-normal">Payouts recorded</th>
-            <th className="py-2 text-right font-normal">Last</th>
+            <th className="py-2 text-right font-normal">Recorded (sample)</th>
+            <th className="py-2 text-right font-normal">Last recorded</th>
           </tr>
         </thead>
         <tbody>

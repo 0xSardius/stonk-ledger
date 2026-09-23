@@ -45,41 +45,10 @@ export default async function CoinPage({ params }: Params) {
           {coin.feeBps != null
             ? `A ${coin.feeBps / 100}% transfer tax on every trade is paid to holders in ${coin.quoteSymbol}`
             : `Holders are paid in ${coin.quoteSymbol}`}
-          {isStock ? ", a tokenized stock." : "."} Every distribution below is
-          signed by the StonkFun distributor and links to its transaction.
+          {isStock ? ", a tokenized stock." : "."} Each distribution below was
+          sent by a StonkFun distributor wallet and links to its transaction.
         </p>
         <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-4 text-sm sm:grid-cols-4">
-          <Stat label="Paid out, last 24h">
-            <Num
-              value={totals.amount24h * f.multiplier}
-              type="token_amount"
-              tokenPriceUsd={sharePrice}
-            />{" "}
-            {coin.quoteSymbol}
-            {sharePrice != null && (
-              <span className="text-muted-foreground">
-                {" "}
-                ·{" "}
-                <Num
-                  value={totals.amount24h * f.multiplier * sharePrice}
-                  type="fiat_value"
-                />
-              </span>
-            )}
-          </Stat>
-          <Stat label="Batches, last 24h">
-            <span className="font-mono tabular-nums">
-              {totals.batches24h.toLocaleString("en-US")}
-            </span>
-            <span className="text-muted-foreground">
-              {" "}
-              to{" "}
-              <span className="font-mono tabular-nums">
-                {totals.recipients24h.toLocaleString("en-US")}
-              </span>{" "}
-              wallets
-            </span>
-          </Stat>
           <Stat label="Lifetime, per StonkFun">
             {snapshot?.distributedTokens != null ? (
               <>
@@ -110,6 +79,15 @@ export default async function CoinPage({ params }: Params) {
               {" "}
               · <Num value={coin.volume24hUsd} type="fiat_value" /> 24h vol
             </span>
+          </Stat>
+          <Stat label="Last recorded batch">
+            {totals.lastSeen ? fmtDateTime(totals.lastSeen) : "--"}
+          </Stat>
+          <Stat label="Recorded here (sample)">
+            <span className="font-mono tabular-nums">
+              {totals.batches.toLocaleString("en-US")}
+            </span>
+            <span className="text-muted-foreground"> batches</span>
           </Stat>
         </dl>
         <p className="mt-4 text-xs text-muted-foreground">
@@ -150,8 +128,9 @@ export default async function CoinPage({ params }: Params) {
         <section className="py-16 text-center">
           <p className="font-serif text-3xl">No distributions recorded yet</p>
           <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
-            The feed fills as the distributor signs batches for this coin. Open
-            any holder&apos;s statement to backfill its history.
+            This ledger samples the distributors&apos; newest batches several
+            times a day, so a small coin can go unrecorded. A holder&apos;s
+            statement always reads that wallet&apos;s full history.
           </p>
         </section>
       ) : (
@@ -222,9 +201,11 @@ export default async function CoinPage({ params }: Params) {
               {totals.payouts.toLocaleString("en-US")}
             </span>{" "}
             payouts
-            {totals.firstSeen && <> since {fmtDate(totals.firstSeen)}</>}.
-            Recording began when this ledger went live; StonkFun&apos;s lifetime
-            total is above.
+            {totals.firstSeen && <> since {fmtDate(totals.firstSeen)}</>}. This
+            is a sample: StonkFun sends over 100,000 distributor transactions a
+            day, and the ledger reads the newest ones several times a day. The
+            complete total is StonkFun&apos;s lifetime figure above; a
+            holder&apos;s statement reads that wallet&apos;s full history.
           </p>
         </section>
       )}

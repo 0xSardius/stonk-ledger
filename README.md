@@ -22,9 +22,9 @@ Built for the [Stocklana hackathon](https://hackathons.solana.com/hackathons/sto
 
 ## What it does
 
-**The receipt.** StonkFun reward coins pay a 3% transfer tax to holders in the coin's quote asset. Thousands are quoted in tokenized stocks. Stonk Ledger classifies every inbound quote transfer signed by the platform's distributor as a payout, values it at receipt and today, and links each one to Solscan. A scheduled job pulls the distributor's new batches every ten minutes for the proof feed, and a wallet's own history is indexed from chain the first time its statement is viewed.
+**The receipt.** StonkFun reward coins pay a 3% transfer tax to holders in the coin's quote asset. Thousands are quoted in tokenized stocks. Stonk Ledger classifies every inbound quote transfer sent by the platform's distributor wallets as a payout, values it at receipt and today, and links each one to Solscan. A wallet's own history is indexed from chain when its statement is viewed, so a statement is complete. The proof feed per coin is a recent sample: a scheduled job reads the distributors' latest batches several times a day. The platform sends over 100k distributor transactions a day, more than the Helius free tier can read.
 
-**The reinvestment.** A holder approves the keeper as a capped delegate on their quote token account. Every ten minutes the keeper sweeps payouts that arrived after the approval, swaps them on Jupiter Ultra into the stock the holder chose (SPYx by default), and sends the stock back, keeping 1% as the fee. Three signatures per run, all on the statement. Revoke is one transaction.
+**The reinvestment.** A holder approves the keeper as a capped delegate on their quote token account. Several times a day the keeper sweeps payouts that arrived after the approval, swaps them on Jupiter Ultra into the stock the holder chose (SPYx by default), and sends the stock back, keeping 1% as the fee. Three signatures per run, all on the statement. Revoke is one transaction.
 
 **Generic.** Every coin is a row in `coins`, seeded from the StonkFun API across all quote categories. Adding a coin is a config row.
 
@@ -60,7 +60,7 @@ pnpm test -- tests/drip-run.test.ts  # keeper decision path against mainnet fixt
 ## Deploy
 
 - **App:** Vercel, repo connected. Production env: `DATABASE_URL`, `HELIUS_API_KEY`, `DRIP_KEEPER_SECRET_KEY`, `NEXT_PUBLIC_APP_URL`.
-- **Scheduled jobs:** GitHub Actions, one cron per file under `.github/workflows/`: `prices.yml` every 5 minutes; `keeper.yml` every 10 minutes pulls the distributor's new batches (`pnpm job ingest-distributor`) then runs the DRIP keeper; `rewards.yml` hourly; `daily.yml` refreshes the coin catalog (`pnpm seed --pages=10`) and rolls batches older than 14 days into daily totals. Repo secrets `DATABASE_URL`, `HELIUS_API_KEY`, `DRIP_KEEPER_SECRET_KEY`. Nothing runs between passes, so cost scales with our users, not with StonkFun's traffic. The `workers/` loops exist for a long-running host if you prefer one.
+- **Scheduled jobs:** GitHub Actions, one cron per file under `.github/workflows/`: `prices.yml` (cron every 5 minutes); `keeper.yml` (cron every 10 minutes) pulls the distributors' new batches (`pnpm job ingest-distributor`, 10 pages per wallet) then runs the DRIP keeper; `rewards.yml` hourly. GitHub runs these crons late on free runners, observed every 1.5 to 7 hours, so treat them as "several times a day"; `daily.yml` refreshes the coin catalog (`pnpm seed --pages=10`) and rolls batches older than 14 days into daily totals. Repo secrets `DATABASE_URL`, `HELIUS_API_KEY`, `DRIP_KEEPER_SECRET_KEY`. Nothing runs between passes, so cost scales with our users, not with StonkFun's traffic. The `workers/` loops exist for a long-running host if you prefer one.
 
 ## Stack
 

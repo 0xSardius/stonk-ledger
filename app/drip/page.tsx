@@ -171,7 +171,7 @@ export default function DripPage() {
         `Approved on chain but not saved: ${JSON.stringify(body.error)}`
       );
     } else {
-      toast.success("DRIP is on. The keeper checks every ten minutes.");
+      toast.success("DRIP is on. The keeper checks several times a day.");
       setSelected(null);
     }
     await mutate();
@@ -222,8 +222,8 @@ export default function DripPage() {
             SOL.
           </li>
           <li>
-            Every ten minutes the keeper sweeps new payouts, swaps on Jupiter,
-            and sends the stock back.
+            Several times a day the keeper sweeps new payouts worth $5 or more,
+            swaps on Jupiter, and sends the stock back.
           </li>
           <li>
             Three signatures per run on your statement. Fee is 1% of the output.
@@ -244,7 +244,7 @@ export default function DripPage() {
           Choose what your payouts become
         </h1>
         <p className="mt-3 max-w-xl text-sm text-muted-foreground">
-          One approval. Every ten minutes the keeper converts new payouts into
+          One approval. Several times a day the keeper converts new payouts into
           the stock you pick and sends it back to this wallet. Revoke any time.
         </p>
         <p className="mt-3 text-sm">

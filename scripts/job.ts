@@ -57,7 +57,7 @@ async function main() {
       const { ingestDistributor } =
         await import("../lib/jobs/ingest-distributor");
       const s = await ingestDistributor({
-        maxPages: Number(rest[0] ?? 30),
+        maxPages: Number(rest[0] ?? 10),
         log: console.log,
       });
       console.log("ingested", s);

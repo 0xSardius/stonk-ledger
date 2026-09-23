@@ -1,6 +1,9 @@
-# Every 10 minutes: pull the distributor's new batches (replaces the Helius
-# webhook, 2026-09-17), then one Stock DRIP keeper pass over every active
-# delegation (PRD F2). The keeper re-indexes its own wallets before each run.
+# Pull the distributors' latest batches (a sample for the proof feed; the
+# Helius webhook it replaced was retired 2026-09-17), then one Stock DRIP
+# keeper pass over every active delegation (PRD F2). The keeper re-indexes
+# its own wallets before each run. Scheduled every 10 minutes; GitHub runs it
+# every 1.5 to 7 hours in practice. Enhanced history costs 100 Helius credits
+# a page, so the pull is capped at 10 pages per distributor wallet.
 name: keeper
 
 on:
@@ -30,5 +33,5 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm job ingest-distributor 30
+      - run: pnpm job ingest-distributor 10
       - run: pnpm job drip-once

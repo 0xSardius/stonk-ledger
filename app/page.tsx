@@ -120,15 +120,15 @@ export default function Home() {
           <p className="font-serif text-2xl">The reinvestment</p>
           <p className="mt-2 text-sm text-muted-foreground">
             Stock DRIP: one capped approval, and a keeper converts new payouts
-            into SPYx, QQQx, or the stock you pick, every ten minutes. Revoke in
-            one click.
+            into SPYx, QQQx, or the stock you pick, several times a day. Revoke
+            in one click.
           </p>
         </div>
         <div>
           <p className="font-serif text-2xl">The proof</p>
           <p className="mt-2 text-sm text-muted-foreground">
             Every DRIP run logs three signatures. Nothing is held for you except
-            the ten seconds between transfer and return, and that is disclosed
+            the seconds between transfer and return, and that is disclosed
             before you approve.
           </p>
         </div>
