@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { brutalButton, brutalPanel } from "@/lib/ui";
+import { PublicDrip } from "./public-drip";
 
 const TOKEN_2022 = "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
 
@@ -213,8 +214,8 @@ export default function DripPage() {
         </h1>
         <p className="mt-3 max-w-xl text-sm text-muted-foreground">
           Connect the wallet that holds a reward coin, top right. Then pick the
-          stock its payouts should turn into: SPYx, QQQx, NVDAx, APPLx, or any
-          xStock on the list.
+          stock its payouts should turn into: SPYx, QQQx, NVDAx, APPLx, any
+          xStock on the list, or a PreStocks pre-IPO token.
         </p>
         <ul className="mt-6 max-w-xl space-y-2 border-t border-border pt-4 text-sm text-muted-foreground">
           <li>
@@ -230,6 +231,7 @@ export default function DripPage() {
             Revoke in one click.
           </li>
         </ul>
+        <PublicDrip />
       </main>
     );
   }
