@@ -15,6 +15,15 @@ export const PLATFORM_DISTRIBUTORS = [
   "HuBMeYW3aDn8BH65fo8xxbP4oiexyup8udzKyccgi8Ga",
 ] as const;
 
+/**
+ * How the scheduled pull splits its page budget. Measured 2026-09-23: a page
+ * of HuBMe… history holds about 90 batches, a page of 5KXDF… about 3.
+ */
+export const INGEST_SHARE: Record<string, number> = {
+  HuBMeYW3aDn8BH65fo8xxbP4oiexyup8udzKyccgi8Ga: 1,
+  "5KXDF6QnqhBj72hDtJNkkpFaQVUfbFXNybMsp3DiK6tD": 0.2,
+};
+
 /** The platform list plus any signers stored on coin rows. */
 export function distributorSet(extra: Iterable<string> = []): Set<string> {
   return new Set<string>([...PLATFORM_DISTRIBUTORS, ...extra]);

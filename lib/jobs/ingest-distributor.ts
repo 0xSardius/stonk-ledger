@@ -13,7 +13,7 @@
 import { desc } from "drizzle-orm";
 import { db, schema } from "../db";
 import { HeliusClient } from "../helius/client";
-import { PLATFORM_DISTRIBUTORS } from "../distributors";
+import { INGEST_SHARE, PLATFORM_DISTRIBUTORS } from "../distributors";
 import { ingestBatch } from "./ingest-batch";
 /** Re-read this much history past the newest stored batch, for same-second ordering. */
 const OVERLAP_MS = 2 * 60_000;
@@ -55,11 +55,15 @@ export async function ingestDistributor(
   // Each distributor gets its own page budget; the floor is shared because
   // both walks are newest-first by block time.
   let allStopped = true;
-  for (const wallet of PLATFORM_DISTRIBUTORS) {
+  const plan = [...PLATFORM_DISTRIBUTORS].sort(
+    (a, b) => (INGEST_SHARE[b] ?? 1) - (INGEST_SHARE[a] ?? 1)
+  );
+  for (const wallet of plan) {
+    const cap = Math.max(1, Math.round(maxPages * (INGEST_SHARE[wallet] ?? 1)));
     let before: string | undefined;
     let pages = 0;
     let stopped = false;
-    while (pages < maxPages) {
+    while (pages < cap) {
       const list = await helius.history(wallet, { before, limit: 100 });
       if (list.length === 0) {
         stopped = true;
