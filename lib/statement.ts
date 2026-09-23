@@ -11,6 +11,7 @@ import { indexWallet } from "./jobs/index-wallet";
 import { JupiterPriceClient, currentMultiplier } from "./prices/jupiter";
 import { findTarget } from "./drip/targets";
 import { runStatus, type RunStatus } from "./drip/plan";
+import { weekOnWeek } from "./trend";
 import { heldActiveCoins } from "./jobs/held-coins";
 import { displaySymbol, truncateAddress } from "./format";
 
@@ -53,6 +54,8 @@ export type CoinStatement = {
     amount24h: number;
     amount7d: number;
     count7d: number;
+    /** Last 7 days against the 7 before, as a fraction; null when history is too short. */
+    weekChange: number | null;
     probableCount: number;
   };
   position: { balance: number; usd: number | null } | null;
@@ -166,6 +169,7 @@ export async function getStatement(
   const now = new Date();
   const since24h = new Date(now.getTime() - 86400_000);
   const since7d = new Date(now.getTime() - 7 * 86400_000);
+  const since14d = new Date(now.getTime() - 14 * 86400_000);
 
   const delegations = await d
     .select()
@@ -192,6 +196,7 @@ export async function getStatement(
         a24: sql<string>`coalesce(sum(case when ${schema.payouts.blockTime} >= ${since24h} then ${schema.payouts.amount} else 0 end),0)::text`,
         a7: sql<string>`coalesce(sum(case when ${schema.payouts.blockTime} >= ${since7d} then ${schema.payouts.amount} else 0 end),0)::text`,
         c7: sql<number>`sum(case when ${schema.payouts.blockTime} >= ${since7d} then 1 else 0 end)::int`,
+        p7: sql<string>`coalesce(sum(case when ${schema.payouts.blockTime} >= ${since14d} and ${schema.payouts.blockTime} < ${since7d} then ${schema.payouts.amount} else 0 end),0)::text`,
       })
       .from(schema.payouts)
       .where(
@@ -253,6 +258,12 @@ export async function getStatement(
         amount24h: Number(agg.a24),
         amount7d: Number(agg.a7),
         count7d: agg.c7,
+        weekChange: weekOnWeek({
+          last7: Number(agg.a7),
+          prev7: Number(agg.p7),
+          first: new Date(agg.first),
+          now,
+        }),
         probableCount: agg.probable,
       },
       position: coinHolding

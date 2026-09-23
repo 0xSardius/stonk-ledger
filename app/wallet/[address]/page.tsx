@@ -289,6 +289,17 @@ function CoinSection({ c }: { c: CoinStatement }) {
             )}
             <span className="font-mono tabular-nums">{t.count7d}</span> payouts
           </span>
+          {t.weekChange != null && (
+            <span className="block text-xs text-muted-foreground">
+              {t.weekChange < 0 ? "down " : "up "}
+              <Num
+                value={Math.abs(100 * t.weekChange)}
+                type="percent"
+                sign="never"
+              />{" "}
+              on the 7 days before
+            </span>
+          )}
         </Stat>
         <Stat label={`${c.symbol} position`}>
           {c.position ? (
