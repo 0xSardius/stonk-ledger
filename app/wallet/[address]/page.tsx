@@ -131,7 +131,7 @@ export default async function WalletPage({ params }: Params) {
                       {r.quoteSymbol}
                     </td>
                     <td className="py-2 pr-3 text-right whitespace-nowrap">
-                      {r.swapSig ? (
+                      {r.status === "done" ? (
                         <>
                           <Num
                             value={r.outAmount}
@@ -141,11 +141,13 @@ export default async function WalletPage({ params }: Params) {
                           {r.targetSymbol}
                         </>
                       ) : (
-                        <span className="text-muted-foreground">refunded</span>
+                        <span className="text-muted-foreground">
+                          {r.status === "refunded" ? "refunded" : "in progress"}
+                        </span>
                       )}
                     </td>
                     <td className="py-2 pr-3 text-right whitespace-nowrap text-muted-foreground">
-                      {r.feeAmount != null ? (
+                      {r.status === "done" && r.feeAmount != null ? (
                         <>
                           <Num
                             value={r.feeAmount}
@@ -165,7 +167,11 @@ export default async function WalletPage({ params }: Params) {
                       {" · "}
                       <ProofLink
                         sig={r.returnSig}
-                        label={r.swapSig ? "return" : "refund"}
+                        label={
+                          r.status === "refunded" || r.status === "refunding"
+                            ? "refund"
+                            : "return"
+                        }
                       />
                     </td>
                   </tr>

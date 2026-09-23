@@ -5,35 +5,30 @@
  *   2. Jupiter Ultra swap quote -> target, taker = keeper       -> swapSig
  *   3. send 99% of the output to the holder's target ATA,
  *      keep 1% as the DRIP fee                                   -> returnSig
- * Every run writes a drip_runs row. If step 2 or 3 fails after step 1, the
- * keeper returns the quote tokens to the holder and records the refund in
- * return_sig with swap_sig null, so nothing stays on the keeper.
+ * The drip_runs row is written before step 1 is sent and moves through a
+ * state machine (plan.ts, settle.ts), so an interrupted run is finished by
+ * the next pass: quote tokens are refunded only if no swap landed, and a
+ * landed swap is always returned.
  */
-import {
-  address,
-  appendTransactionMessageInstructions,
-  assertIsTransactionWithBlockhashLifetime,
-  createTransactionMessage,
-  getBase64EncodedWireTransaction,
-  getBase64Encoder,
-  getSignatureFromTransaction,
-  getTransactionDecoder,
-  pipe,
-  setTransactionMessageFeePayerSigner,
-  setTransactionMessageLifetimeUsingBlockhash,
-  signTransaction,
-  signTransactionMessageWithSigners,
-  type Address,
-  type Instruction,
-  type KeyPairSigner,
-} from "@solana/kit";
-import * as spl from "@solana-program/token";
-import * as t22 from "@solana-program/token-2022";
-import { and, eq, gte, isNotNull, sql } from "drizzle-orm";
+import type { KeyPairSigner } from "@solana/kit";
+import { and, eq, gte, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import { db, schema } from "../db";
-import { TOKEN_2022_PROGRAM } from "../helius/client";
 import { keeperConnection, keeperSigner } from "./keeper";
-import { decideSweep, rawToUi, splitFee } from "./plan";
+import {
+  TERMINAL,
+  decideSweep,
+  rawToDecimal,
+  rawToUi,
+  runStatus,
+  type RunStatus,
+} from "./plan";
+import {
+  settleRun,
+  signTransferIn,
+  type Run,
+  type RunAccounts,
+  type SettleCtx,
+} from "./settle";
 import { findTarget } from "./targets";
 import { UltraClient } from "./ultra";
 import { readTokenAccount } from "./verify";
@@ -58,15 +53,84 @@ export type RunResult =
       returnSig: string;
       error: string;
     }
-  | { status: "failed"; error: string; transferSig?: string };
+  | {
+      status: "unfinished";
+      runId: number;
+      runStatus: RunStatus;
+      note: string;
+    }
+  | { status: "failed"; error: string; runId?: number };
 
-function programFor(programId: string) {
-  return programId === TOKEN_2022_PROGRAM ? t22 : spl;
+/**
+ * SQL filter for runs whose input counts as swept: everything except a
+ * refund or a transfer that never landed. Matches countsAsSwept in plan.ts;
+ * rows from before the state machine have a null status.
+ */
+export const sweptRunsFilter = sql`coalesce(${schema.dripRuns.status},
+  case when ${schema.dripRuns.swapSig} is null and ${schema.dripRuns.returnSig} is not null
+       then 'refunded' else 'done' end) not in ('refunded', 'void')`;
+
+const LEASE = sql`now() + interval '15 minutes'`;
+
+/** Claim a delegation for this pass; false when another pass holds it. */
+async function claim(del: Delegation) {
+  const rows = await db()
+    .update(schema.dripDelegations)
+    .set({ lockedUntil: LEASE })
+    .where(
+      and(
+        eq(schema.dripDelegations.wallet, del.wallet),
+        eq(schema.dripDelegations.quoteMint, del.quoteMint),
+        or(
+          isNull(schema.dripDelegations.lockedUntil),
+          lt(schema.dripDelegations.lockedUntil, sql`now()`)
+        )
+      )
+    )
+    .returning({ wallet: schema.dripDelegations.wallet });
+  return rows.length > 0;
 }
 
-async function ata(owner: Address, mint: Address, tokenProgram: Address) {
-  const [pda] = await spl.findAssociatedTokenPda({ owner, mint, tokenProgram });
-  return pda;
+async function release(del: Delegation) {
+  await db()
+    .update(schema.dripDelegations)
+    .set({ lockedUntil: null })
+    .where(
+      and(
+        eq(schema.dripDelegations.wallet, del.wallet),
+        eq(schema.dripDelegations.quoteMint, del.quoteMint)
+      )
+    );
+}
+
+function toResult(run: Run, note?: string): RunResult {
+  const s = runStatus(run);
+  if (s === "done")
+    return {
+      status: "swept",
+      runId: run.id,
+      transferSig: run.transferSig!,
+      swapSig: run.swapSig!,
+      returnSig: run.returnSig!,
+      inUi: Number(run.inAmount),
+      outUi: Number(run.outAmount),
+    };
+  if (s === "refunded")
+    return {
+      status: "refunded",
+      runId: run.id,
+      transferSig: run.transferSig!,
+      returnSig: run.returnSig!,
+      error: note ?? "swap did not land",
+    };
+  if (s === "void")
+    return { status: "failed", runId: run.id, error: "transfer did not land" };
+  return {
+    status: "unfinished",
+    runId: run.id,
+    runStatus: s,
+    note: note ?? "waiting for chain",
+  };
 }
 
 export async function runDelegation(
@@ -78,10 +142,31 @@ export async function runDelegation(
     now?: Date;
   } = {}
 ): Promise<RunResult> {
+  if (!(await claim(del)))
+    return { status: "skipped", reason: "another keeper pass holds it" };
+  try {
+    return await runClaimed(del, deps);
+  } finally {
+    await release(del);
+  }
+}
+
+async function runClaimed(
+  del: Delegation,
+  deps: {
+    keeper?: KeyPairSigner;
+    ultra?: UltraClient;
+    conn?: ReturnType<typeof keeperConnection>;
+    now?: Date;
+  }
+): Promise<RunResult> {
   const d = db();
-  const keeper = deps.keeper ?? (await keeperSigner());
-  const conn = deps.conn ?? keeperConnection();
-  const ultra = deps.ultra ?? new UltraClient();
+  const ctx: SettleCtx = {
+    keeper: deps.keeper ?? (await keeperSigner()),
+    conn: deps.conn ?? keeperConnection(),
+    ultra: deps.ultra ?? new UltraClient(),
+  };
+  const keeper = ctx.keeper;
 
   const [coin] = await d
     .select()
@@ -96,15 +181,39 @@ export async function runDelegation(
   const decimals = coin.quoteDecimals;
   if (decimals == null)
     return { status: "skipped", reason: "quote decimals unknown" };
+  const acct: RunAccounts = {
+    holder: del.wallet,
+    quoteMint: del.quoteMint,
+    quoteProgram: del.quoteProgram,
+    quoteDecimals: decimals,
+    quoteTokenAccount: del.quoteTokenAccount,
+  };
 
-  // on-chain state of the holder's quote account
-  const state = await readTokenAccount(
-    conn.rpc,
-    del.quoteTokenAccount,
-    del.quoteProgram
-  );
-  if (state.delegate !== keeper.address || state.delegatedAmountRaw <= 0n) {
-    await d
+  // Finish any run an earlier pass left mid-way before starting a new one.
+  const open = await d
+    .select()
+    .from(schema.dripRuns)
+    .where(
+      and(
+        eq(schema.dripRuns.wallet, del.wallet),
+        eq(schema.dripRuns.coinId, del.coinId),
+        inArray(schema.dripRuns.status, [
+          "transferring",
+          "transferred",
+          "swapping",
+          "swapped",
+          "returning",
+          "refunding",
+        ])
+      )
+    );
+  for (const r of open) {
+    const res = await settleRun(r, acct, ctx, { allowSwap: false });
+    if (!TERMINAL.has(runStatus(res.run))) return toResult(res.run, res.note);
+  }
+
+  const markRevoked = () =>
+    d
       .update(schema.dripDelegations)
       .set({ revokedSig: del.revokedSig ?? "revoked-on-chain" })
       .where(
@@ -113,6 +222,25 @@ export async function runDelegation(
           eq(schema.dripDelegations.quoteMint, del.quoteMint)
         )
       );
+
+  // on-chain state of the holder's quote account
+  let state;
+  try {
+    state = await readTokenAccount(
+      ctx.conn.rpc,
+      del.quoteTokenAccount,
+      del.quoteProgram
+    );
+  } catch (err) {
+    const msg = (err as Error).message ?? "";
+    if (/not found|could not find|does not exist/i.test(msg)) {
+      await markRevoked();
+      return { status: "skipped", reason: "quote account closed" };
+    }
+    throw err;
+  }
+  if (state.delegate !== keeper.address || state.delegatedAmountRaw <= 0n) {
+    await markRevoked();
     return { status: "skipped", reason: "delegation not present on chain" };
   }
 
@@ -138,7 +266,7 @@ export async function runDelegation(
       and(
         eq(schema.dripRuns.wallet, del.wallet),
         eq(schema.dripRuns.coinId, del.coinId),
-        isNotNull(schema.dripRuns.swapSig)
+        sweptRunsFilter
       )
     );
   const [price] = await d
@@ -166,163 +294,30 @@ export async function runDelegation(
       pendingUsd: decision.usd,
     };
 
-  const amountRaw = decision.amountRaw;
-  const quoteMint = address(del.quoteMint);
-  const quoteProgram = address(del.quoteProgram);
-  const targetMint = address(del.targetMint);
-  const targetProgram = address(TOKEN_2022_PROGRAM);
-  const holder = address(del.wallet);
-  const qp = programFor(del.quoteProgram);
-
-  const keeperQuoteAta = await ata(keeper.address, quoteMint, quoteProgram);
-  const keeperTargetAta = await ata(keeper.address, targetMint, targetProgram);
-  const holderTargetAta = await ata(holder, targetMint, targetProgram);
-
-  async function sendIxs(ixs: Instruction[]) {
-    const { value: blockhash } = await conn.rpc
-      .getLatestBlockhash({ commitment: "confirmed" })
-      .send();
-    const msg = pipe(
-      createTransactionMessage({ version: 0 }),
-      (m) => setTransactionMessageFeePayerSigner(keeper, m),
-      (m) => setTransactionMessageLifetimeUsingBlockhash(blockhash, m),
-      (m) => appendTransactionMessageInstructions(ixs, m)
-    );
-    const signed = await signTransactionMessageWithSigners(msg);
-    assertIsTransactionWithBlockhashLifetime(signed);
-    await conn.sendAndConfirm(signed, { commitment: "confirmed" });
-    return getSignatureFromTransaction(signed);
-  }
-
-  // 1. pull the sweep amount into the keeper's quote ATA (delegate authority)
-  let transferSig: string;
+  // 1. sign the pull, record it, then send it
+  const transfer = await signTransferIn(acct, decision.amountRaw, ctx);
+  const [row] = await d
+    .insert(schema.dripRuns)
+    .values({
+      wallet: del.wallet,
+      coinId: del.coinId,
+      inAmount: rawToDecimal(decision.amountRaw, decimals),
+      outMint: del.targetMint,
+      transferSig: transfer.sig,
+      status: "transferring",
+      statusAt: new Date(),
+      ts: deps.now ?? new Date(),
+    })
+    .returning();
   try {
-    transferSig = await sendIxs([
-      qp.getCreateAssociatedTokenIdempotentInstruction({
-        payer: keeper,
-        owner: keeper.address,
-        mint: quoteMint,
-        ata: keeperQuoteAta,
-        tokenProgram: quoteProgram,
-      }),
-      qp.getTransferCheckedInstruction({
-        source: address(del.quoteTokenAccount),
-        mint: quoteMint,
-        destination: keeperQuoteAta,
-        authority: keeper,
-        amount: amountRaw,
-        decimals,
-      }),
-    ]);
-  } catch (err) {
-    return { status: "failed", error: `transfer: ${(err as Error).message}` };
+    await ctx.conn.sendAndConfirm(transfer.signed, { commitment: "confirmed" });
+  } catch {
+    // settleRun reads the outcome from chain
   }
 
-  // 2 + 3, with refund on failure
-  try {
-    const order = await ultra.order({
-      inputMint: del.quoteMint,
-      outputMint: del.targetMint,
-      amount: amountRaw,
-      taker: keeper.address,
-    });
-    if (!order.transaction) throw new Error("Ultra returned no transaction");
-    const tx = getTransactionDecoder().decode(
-      getBase64Encoder().encode(order.transaction)
-    );
-    const signedTx = await signTransaction([keeper.keyPair], tx);
-    const exec = await ultra.execute(
-      getBase64EncodedWireTransaction(signedTx),
-      order.requestId
-    );
-    const swapSig = exec.signature!;
-    const outRaw = BigInt(exec.outputAmountResult ?? order.outAmount);
-    const { toHolderRaw, feeRaw } = splitFee(outRaw);
-
-    const returnSig = await sendIxs([
-      t22.getCreateAssociatedTokenIdempotentInstruction({
-        payer: keeper,
-        owner: holder,
-        mint: targetMint,
-        ata: holderTargetAta,
-        tokenProgram: targetProgram,
-      }),
-      t22.getTransferCheckedInstruction({
-        source: keeperTargetAta,
-        mint: targetMint,
-        destination: holderTargetAta,
-        authority: keeper,
-        amount: toHolderRaw,
-        decimals: target.decimals,
-      }),
-    ]);
-
-    const [row] = await d
-      .insert(schema.dripRuns)
-      .values({
-        wallet: del.wallet,
-        coinId: del.coinId,
-        inAmount: rawToUi(amountRaw, decimals).toString(),
-        outMint: del.targetMint,
-        outAmount: rawToUi(toHolderRaw, target.decimals).toString(),
-        feeAmount: rawToUi(feeRaw, target.decimals).toString(),
-        transferSig,
-        swapSig,
-        returnSig,
-        ts: deps.now ?? new Date(),
-      })
-      .returning({ id: schema.dripRuns.id });
-    return {
-      status: "swept",
-      runId: row.id,
-      transferSig,
-      swapSig,
-      returnSig,
-      inUi: rawToUi(amountRaw, decimals),
-      outUi: rawToUi(toHolderRaw, target.decimals),
-    };
-  } catch (err) {
-    // refund: send the quote tokens straight back to the holder's account
-    const error = (err as Error).message;
-    try {
-      const refundSig = await sendIxs([
-        qp.getTransferCheckedInstruction({
-          source: keeperQuoteAta,
-          mint: quoteMint,
-          destination: address(del.quoteTokenAccount),
-          authority: keeper,
-          amount: amountRaw,
-          decimals,
-        }),
-      ]);
-      const [row] = await d
-        .insert(schema.dripRuns)
-        .values({
-          wallet: del.wallet,
-          coinId: del.coinId,
-          inAmount: rawToUi(amountRaw, decimals).toString(),
-          outMint: del.targetMint,
-          outAmount: null,
-          feeAmount: null,
-          transferSig,
-          swapSig: null,
-          returnSig: refundSig,
-          ts: deps.now ?? new Date(),
-        })
-        .returning({ id: schema.dripRuns.id });
-      return {
-        status: "refunded",
-        runId: row.id,
-        transferSig,
-        returnSig: refundSig,
-        error,
-      };
-    } catch (refundErr) {
-      return {
-        status: "failed",
-        transferSig,
-        error: `${error}; refund also failed: ${(refundErr as Error).message}`,
-      };
-    }
-  }
+  // 2 + 3
+  const res = await settleRun(row, acct, ctx, { allowSwap: true });
+  const out = toResult(res.run, res.note);
+  if (out.status === "swept") out.inUi = rawToUi(decision.amountRaw, decimals);
+  return out;
 }

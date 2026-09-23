@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { heliusRpcUrl } from "@/lib/env";
+import { env, heliusRpcUrl } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 
@@ -30,9 +30,56 @@ const ALLOWED = new Set([
   "sendTransaction",
 ]);
 
+/** The wallet flow never batches more than a few calls. */
+const MAX_BATCH = 5;
+const MAX_BODY_BYTES = 64 * 1024;
+const MAX_KEYS = 10;
+
+const deny = (message: string, status = 400) =>
+  NextResponse.json(
+    { jsonrpc: "2.0", id: null, error: { code: -32600, message } },
+    { status }
+  );
+
+/**
+ * Browsers always send Origin on a POST, so this stops other sites from
+ * using the relay from their pages. A script can forge the header; the batch
+ * and key limits below bound what one forged request can cost.
+ */
+function originAllowed(req: Request) {
+  const origin = req.headers.get("origin");
+  if (!origin) return false;
+  if (origin === new URL(env.NEXT_PUBLIC_APP_URL).origin) return true;
+  return (
+    process.env.NODE_ENV !== "production" &&
+    origin.startsWith("http://localhost:")
+  );
+}
+
 export async function POST(req: Request) {
-  const body = await req.json().catch(() => null);
-  const calls = Array.isArray(body) ? body : [body];
+  if (!originAllowed(req)) return deny("origin not allowed", 403);
+  const raw = await req.text();
+  if (raw.length > MAX_BODY_BYTES) return deny("request too large", 413);
+  let body: unknown;
+  try {
+    body = JSON.parse(raw);
+  } catch {
+    return deny("invalid JSON");
+  }
+  const calls = (Array.isArray(body) ? body : [body]) as {
+    id?: unknown;
+    method?: unknown;
+    params?: unknown[];
+  }[];
+  if (calls.length > MAX_BATCH) return deny("batch too large");
+  for (const c of calls) {
+    if (
+      c?.method === "getMultipleAccounts" &&
+      Array.isArray(c.params?.[0]) &&
+      (c.params[0] as unknown[]).length > MAX_KEYS
+    )
+      return deny("too many accounts");
+  }
   for (const c of calls) {
     if (!c || typeof c.method !== "string" || !ALLOWED.has(c.method)) {
       return NextResponse.json(
@@ -48,7 +95,7 @@ export async function POST(req: Request) {
   const upstream = await fetch(heliusRpcUrl(), {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify(body),
+    body: raw,
   });
   const text = await upstream.text();
   return new NextResponse(text, {

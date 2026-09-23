@@ -159,6 +159,8 @@ export const dripDelegations = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
+    /** Keeper lease: a pass claims the row until this time, so two passes never sweep it at once. */
+    lockedUntil: timestamp("locked_until", { withTimezone: true }),
   },
   (t) => [primaryKey({ columns: [t.wallet, t.quoteMint] })]
 );
@@ -177,6 +179,10 @@ export const dripRuns = pgTable("drip_runs", {
   swapSig: text("swap_sig"),
   returnSig: text("return_sig"),
   ts: timestamp("ts", { withTimezone: true }).notNull().defaultNow(),
+  /** Run state machine, see lib/drip/plan.ts RunStatus. Null on rows before 2026-09-23 (all complete). */
+  status: text("status"),
+  /** When the current status was set; a sent transaction older than its blockhash lifetime has expired. */
+  statusAt: timestamp("status_at", { withTimezone: true }),
 });
 
 export const watches = pgTable(

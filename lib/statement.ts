@@ -10,6 +10,7 @@ import { HeliusClient } from "./helius/client";
 import { indexWallet } from "./jobs/index-wallet";
 import { JupiterPriceClient, currentMultiplier } from "./prices/jupiter";
 import { findTarget } from "./drip/targets";
+import { runStatus, type RunStatus } from "./drip/plan";
 import { heldActiveCoins } from "./jobs/held-coins";
 import { displaySymbol } from "./format";
 
@@ -76,6 +77,7 @@ export type DripRunRow = {
   transferSig: string | null;
   swapSig: string | null;
   returnSig: string | null;
+  status: RunStatus;
   ts: Date;
 };
 
@@ -291,7 +293,9 @@ export async function getStatement(
     .orderBy(desc(schema.dripRuns.ts))
     .limit(20);
   const coinById = new Map(coins.map((c) => [c.id, c]));
-  const runs: DripRunRow[] = runRows.map((r) => ({
+  // a transfer that never landed moved nothing; leave it off the statement
+  const shown = runRows.filter((r) => runStatus(r) !== "void");
+  const runs: DripRunRow[] = shown.map((r) => ({
     id: r.id,
     coinSymbol: coinById.get(r.coinId)?.symbol ?? "?",
     quoteSymbol: displaySymbol(
@@ -305,6 +309,7 @@ export async function getStatement(
     transferSig: r.transferSig,
     swapSig: r.swapSig,
     returnSig: r.returnSig,
+    status: runStatus(r),
     ts: r.ts,
   }));
 

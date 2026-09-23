@@ -3,12 +3,15 @@
  *
  *   pnpm tsx scripts/research/capture-tx.ts <sig> <fixture-name>
  *   pnpm tsx scripts/research/capture-tx.ts --from=<wallet> --to=<wallet> <fixture-name>
+ *   pnpm tsx scripts/research/capture-tx.ts --rpc <sig> <fixture-name>
  *
  * The second form reads the sender's latest 100 transactions and saves the
  * first one with a token transfer from `--from` to `--to`.
  */
 import { writeFileSync } from "node:fs";
 import path from "node:path";
+import { signature } from "@solana/kit";
+import { keeperConnection } from "../../lib/drip/keeper";
 import { HeliusClient } from "../../lib/helius/client";
 
 async function main() {
@@ -34,6 +37,23 @@ async function main() {
       )
     );
     if (!tx) throw new Error(`no transfer ${from} -> ${to} in 100 txs`);
+  } else if (flags.has("rpc")) {
+    // raw RPC getTransaction, jsonParsed: the shape the API routes read
+    const [sig, n] = args;
+    name = n;
+    const { rpc } = keeperConnection();
+    const raw = await rpc
+      .getTransaction(signature(sig), {
+        commitment: "confirmed",
+        encoding: "jsonParsed",
+        maxSupportedTransactionVersion: 0,
+      })
+      .send();
+    tx = JSON.parse(
+      JSON.stringify(raw, (_k, v) => (typeof v === "bigint" ? Number(v) : v))
+    );
+    tx.signature = sig;
+    tx.timestamp = tx.blockTime;
   } else {
     const [sig, n] = args;
     name = n;

@@ -38,13 +38,18 @@ async function main() {
         } catch (err) {
           console.error(`index ${del.wallet.slice(0, 8)} failed`, err);
         }
-        const r = await runDelegation(del);
-        console.log(
-          del.wallet.slice(0, 8),
-          JSON.stringify(r, (_k, v) =>
-            typeof v === "bigint" ? v.toString() : v
-          )
-        );
+        // one delegation's failure must not stop the ones after it
+        try {
+          const r = await runDelegation(del);
+          console.log(
+            del.wallet.slice(0, 8),
+            JSON.stringify(r, (_k, v) =>
+              typeof v === "bigint" ? v.toString() : v
+            )
+          );
+        } catch (err) {
+          console.error(`run ${del.wallet.slice(0, 8)} failed`, err);
+        }
       }
       return;
     }

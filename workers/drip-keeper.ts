@@ -32,6 +32,8 @@ runLoop("drip-keeper", INTERVAL_MS, async () => {
         console.log(
           `[drip-keeper] ${w}… skip: ${r.reason}${r.pendingUsd != null ? ` ($${r.pendingUsd.toFixed(2)} pending)` : ""}`
         );
+      } else if (r.status === "unfinished") {
+        console.log(`[drip-keeper] ${w}… ${r.runStatus}: ${r.note}`);
       } else {
         console.error(`[drip-keeper] ${w}… ${r.status}: ${r.error}`);
       }

@@ -5,7 +5,6 @@ import {
   eq,
   gte,
   inArray,
-  isNotNull,
   isNull,
   sql,
 } from "drizzle-orm";
@@ -14,6 +13,7 @@ import { HeliusClient } from "@/lib/helius/client";
 import { heldActiveCoins } from "@/lib/jobs/held-coins";
 import { keeperConnection, keeperSigner } from "@/lib/drip/keeper";
 import { readTokenAccount } from "@/lib/drip/verify";
+import { sweptRunsFilter } from "@/lib/drip/run";
 import { DRIP_TARGETS, DEFAULT_THRESHOLD_USD } from "@/lib/drip/targets";
 import { displaySymbol } from "@/lib/format";
 
@@ -118,7 +118,7 @@ export async function GET(req: Request) {
           and(
             eq(schema.dripRuns.wallet, wallet),
             eq(schema.dripRuns.coinId, del.coinId),
-            isNotNull(schema.dripRuns.swapSig)
+            sweptRunsFilter
           )
         );
       pendingUi = Math.max(0, Number(since.amount) - Number(swept.amount));
