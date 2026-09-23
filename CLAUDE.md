@@ -8,7 +8,7 @@ Stonk Ledger: a Stocklana hackathon entry (Solana Foundation; submissions close 
 
 **Positioning (decided 2026-09-12):** Stock DRIP is the headline feature. The ledger is the plumbing DRIP needs and the proof that each run happened. Lead every pitch, README, and page with DRIP. Scoring is in `.superstack/entry-scoring.md`.
 
-**Current state (2026-09-16):** live at https://stonk-ledger.vercel.app. Statement, share card, proof feed, DRIP (three mainnet runs, the third into a Tessera token), scheduled pull of distributor batches, all jobs on GitHub Actions. Brand applied per `brand.md`. Entered for the main track plus the PreStocks and Tessera bounties. Next: `docs/SUBMISSION.md`, videos, submit by 2026-09-23. Read `docs/CHECKPOINT.md` first in every session; it holds the day-by-day status and blockers. `docs/PRD.md` v0.5 is the spec. `.superstack/idea-context.md` and `.superstack/build-context.md` are the phase handoffs.
+**Current state (2026-09-23):** live at https://stonk-ledger.vercel.app. Statement, share card, proof feed (a sample), DRIP with a recorded run state machine (three mainnet runs so far), scheduled pull of two distributor wallets, all jobs on GitHub Actions (which run "several times a day", not every 10 minutes). Brand applied per `brand.md`. Entered for the main track plus the **PreStocks bounty only**. Tessera was dropped because the PreStocks bounty excludes other pre-IPO tokens; never add a non-PreStocks pre-IPO target. Next: rewrite `docs/SUBMISSION.md`, videos, submit the morning of 2026-09-25. Read `docs/CHECKPOINT.md` first in every session; it holds the day-by-day status and blockers. `docs/PRD.md` v0.5 is the spec. `.superstack/idea-context.md` and `.superstack/build-context.md` are the phase handoffs.
 
 ## Commands
 

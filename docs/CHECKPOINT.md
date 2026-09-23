@@ -1,9 +1,38 @@
 # Checkpoint — Stonk Ledger
 
-**Last updated:** 2026-09-19
-**Phase:** Product complete and verified on production, entered for main track + PreStocks + Tessera. Submission package drafted in `docs/SUBMISSION.md`; videos and form not done. Submissions close 2026-09-25 4 pm ET; target submit 2026-09-23.
+**Last updated:** 2026-09-23
+**Phase:** Review and hardening after a full product review (2026-09-22/23). Entry is now **main track + PreStocks bounty only**. Tessera was dropped: the PreStocks bounty page, updated Sep 19, makes projects that integrate any non-PreStocks pre-IPO token ineligible. Submissions close 2026-09-25 4 pm ET. **New target: submit the morning of Sep 25.**
 
-## Resume here (next session)
+## Resume here (2026-09-23 session)
+
+### Review verdict (2026-09-22)
+
+Worth submitting, but only after fixes. Three reviews ran: DRIP money path, ledger data, and a hackathon/market check. Likely bands (estimates): main track top 25% of 176+ entries; PreStocks bounty a top-3 contender now that Tessera is out. Weaknesses a judge will see: zero outside DRIP users, tiny demo amounts, Slawth uses the same delegation mechanism (it compounds into the meme coin; DRIP turns payouts into a chosen stock). Most top StonkFun coins now pay crypto (ZEC, HYPE, PEPE), so the pitch moves to "any payout into any stock". Honest answer to "does it help a user": the statement helps now (payout trend, payouts against position, a receipt per payout); DRIP is a convenience that has not yet earned outside trust.
+
+### Fixed and pushed on 2026-09-23 (all on `main`, deployed by Vercel)
+
+1. `be3db7a` **Second distributor.** Since about 2026-09-20 06:30 UTC StonkFun pays most batches from `HuBMeYW3aDn8BH65fo8xxbP4oiexyup8udzKyccgi8Ga`, funded by `5KXDF…`. Ingestion read only `5KXDF…`, so feeds were near-frozen, statements showed new payouts as `probable`, and funding transfers were stored as fake one-recipient batches. `lib/distributors.ts` now holds both; regression test on mainnet fixtures. **Verified on Actions** (run 35805894171): HuBMe pages yield about 90 batches each, 926 batches in one pass.
+2. `30348a4` **DRIP hardening.** Run state machine on `drip_runs` (`status`, `status_at`; `lib/drip/settle.ts`): signatures recorded before sending, refund only when no swap landed, landed swaps always returned with output read from chain, interrupted runs finished next pass. Ultra order guard (mints, amount, at most 2% loss). 15-minute lease per delegation (`locked_until`). Per-delegation try/catch in `drip-once`. `/api/drip/approve` requires a recent approval tx signed by the wallet; $1 minimum threshold; re-approval after revoke starts fresh. `/api/rpc`: own origin only, 5 calls per batch, 10 accounts. Columns added in production with `scripts/maintenance/add-run-status.ts` (additive). **Verified live:** relay returns 403 without origin and 200 from the app origin.
+3. `692fb08` Tessera targets removed; a test pins PreStocks as the only pre-IPO issuer.
+4. `f37d69e`, `7e8ee1b` Honest cadence and labels. GitHub runs the 10-minute cron every 1.5 to 7 hours; the UI and README now say "several times a day". Enhanced history costs 100 Helius credits per page (1M free a month), so ingestion is capped at 10 pages, split HuBMe 10 / 5KXDF 2, about 250k credits a month. Coin pages lead with StonkFun's lifetime total and label the ledger's count as a sample; 24-hour stats removed.
+5. `f99ffb4` `/drip` public view: run counts, recent runs with proof links, targets, for visitors without a wallet.
+6. `4cdbc43` Statement shows the week-on-week payout change per coin when history covers two weeks.
+7. `3268d95` `scripts/maintenance/fix-distributor-rows.ts` (dry run by default). Dry run result: 5,443 of 5,485 one-recipient batches since Sep 20 are funding transfers; 89 of 89 probable payouts came from a distributor. **Not applied: needs owner approval (deletes production rows).**
+
+76 tests pass. `pnpm build`, typecheck, and lint are clean.
+
+### Not done, in order
+
+1. Owner approval, then `pnpm tsx scripts/maintenance/fix-distributor-rows.ts --apply`.
+2. Rewrite `docs/SUBMISSION.md`: PreStocks only, "any payout into any stock", Slawth comparison, and corrected numbers (the review found most figures stale or false; see the claim table in this session's review). Rewrite both video scripts to match.
+3. Owner: re-approve DRIP with the test wallet `88tv…`. Threshold is now at least $1. Make one run of $5 or more, ideally into a PreStocks token.
+4. Owner: check the statement and `/drip` on a phone (Chrome resize still fails, so 375px is unverified).
+5. Optional, highest value: ask 3 to 5 StonkFun holders (TREE, AGI, KNOTS communities) to open their statement and try DRIP.
+6. Record videos, submit on Sep 25 morning.
+
+Post-hackathon from the review: statement stop cursor per token account (`wallets.lastIndexedSig`), keeper address as a public env var (remove the secret from Vercel), per-IP rate limit on `/api/drip/status`, auto-detect new distributor wallets, CSV export of payouts with USD at receipt, historical prices for USD at receipt (89% of recent rows are estimated because prices run only several times a day).
+
+## Earlier: resume notes from 2026-09-19
 
 Product is ready to submit; `docs/SUBMISSION.md` holds the description, both video scripts, and the form checklist. Everything left is owner-side; see "Remaining" below. Claude's job on resume: confirm the four scheduled jobs are still green (`gh run list --limit 8`), confirm `/api/health` responds, and help with anything the phone check or the recording turns up.
 
