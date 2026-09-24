@@ -1,79 +1,104 @@
 # Stocklana submission package
 
-Target submit: 2026-09-23. Submissions close 2026-09-25, 4 pm ET. Edits are allowed until close.
-Tracks: **Main track** ($100k, Solana Foundation), **Best Use of PreStocks** ($5k), **Best Use of Tessera** ($6k).
+Submissions close 2026-09-25, 4 pm ET. Edits are allowed until close. Submitting without videos (decided 2026-09-24): the form requires at least one link, and the live site plus the repo carry the demo.
+
+Tracks: **Main track** and **Best Use of PreStocks**. Do not select Tessera: the PreStocks bounty excludes projects that integrate any other pre-IPO token, and the Tessera targets were removed on 2026-09-23.
 
 Links for the form:
 
 - Live: https://stonk-ledger.vercel.app
 - Repo (public, MIT): https://github.com/0xSardius/stonk-ledger
-- Pitch video (3 min) and technical video (5 min): record from the scripts below
 
-## 1. Description (paste into the form)
+Every figure below was checked against production on 2026-09-24.
 
-**Stonk Ledger: the receipt and the reinvestment for meme coins that pay dividends in tokenized stocks.**
+## 1. Short description
 
-Thousands of Solana meme coins now pay holders in tokenized stocks and pre-IPO tokens: TREE pays APPLx, AGI pays Anthropic PreStocks, hundreds more pay SPYx, NVDAx, OpenAI, SpaceX. The payouts land as plain token transfers from one platform wallet, so nobody can see what a wallet has actually been paid, and nobody can turn that stream into the stock they want.
+> Stonk Ledger shows every tokenized-stock dividend a Solana wallet earned from StonkFun reward coins, with an on-chain proof link for each payout. Stock DRIP turns that payout stream into the stock you choose, SPYx or a PreStocks pre-IPO token, with one capped approval and no custody.
 
-Stonk Ledger does both.
+## 2. Full description (markdown)
 
-**The receipt.** Paste any wallet. See every stock dividend it received, per coin, valued at receipt and today, each payout linked to its transaction. No wallet connection. Payouts are classified by a fixed rule against the platform's distributor wallet, fixture-tested on mainnet batches. Every coin on StonkFun is covered from config; nothing is hardcoded.
+```markdown
+# Stonk Ledger
 
-**The reinvestment: Stock DRIP.** Connect the wallet, sign one capped token approval, pick a target: SPYx, QQQx, NVDAx, APPLx, TSLAx, GLDx, MCDx, eight PreStocks pre-IPO tokens (OpenAI, Anthropic, SpaceX, Anduril, Neuralink, Polymarket, Kalshi, Figure AI), or Tessera's T-OpenAI, T-Kalshi, T-SpaceX. A keeper checks every ten minutes, sweeps new payouts up to your cap, swaps through Jupiter Ultra, and sends the stock back to your wallet. It logs three signatures per run: transfer, swap, return. It never holds your keys, can move nothing but the delegated amount, and one signed Revoke ends it. The 1% fee comes out of the swap output.
+**The receipt and the reinvestment for meme coins that pay dividends in tokenized stocks.**
 
-**Live on mainnet.** Three DRIP runs so far, one made unattended by the scheduled keeper, and the latest into a Tessera pre-IPO token. The ledger pulls fresh distributor batches every ten minutes and holds over 89,000 recorded batches for the proof feed.
+Live on mainnet: https://stonk-ledger.vercel.app · Repo (MIT): https://github.com/0xSardius/stonk-ledger
 
-**Why Solana.** The payouts are Token-2022 transfer-tax distributions that only exist here. Delegation with a cap is a native token-program primitive, so a non-custodial DRIP needs no contract and no custody. Jupiter routes into xStocks, PreStocks, and Tessera tokens today.
+## The problem
 
-**PreStocks track.** 300 seeded StonkFun coins pay in PreStocks tokens. Before this project, the ledger had recorded 5,834 PreStocks-denominated payouts to 2,476 wallets, with AGI alone paying 4,281 dividends in Anthropic PreStocks to 2,053 holders. Every PreStocks token is also a DRIP target, mints verified against the PreStocks API in a test.
+StonkFun reward coins pay holders a share of each coin's trading tax in another token: Apple (APPLx), the S&P 500 (SPYx), Nvidia, or PreStocks pre-IPO tokens such as Anthropic and OpenAI. Stonk Ledger tracks over 6,500 of the most traded reward coins; over 1,500 of them pay in PreStocks.
 
-**Tessera track.** DRIP into T-OpenAI, T-Kalshi, and T-SpaceX turns any StonkFun payout stream into Tessera exposure. Verified with a live mainnet run: 0.190898 STONK swept into T-OpenAI, three signatures on chain.
+The payouts arrive as plain token transfers from a platform wallet, often dozens of small ones a week per coin. A holder cannot easily answer two questions:
+
+1. **What have I actually been paid, and is it still worth holding?**
+2. **Can I get the stock I want instead of the one the coin pays?**
+
+## The receipt: a dividend statement for any wallet
+
+Paste any wallet address. No connection needed.
+
+- Every payout per coin, valued at receipt and today, each linked to its transaction on Solscan.
+- Totals in shares, not just dollars, because the payout is a stock.
+- The payout trend: this week against the week before.
+- Payouts measured against the value of the position that earned them.
+
+Example: [a top TREE holder](https://stonk-ledger.vercel.app/wallet/4di7dpumucn9xr3Wt2SpMxP1kjpX7iM8KhgtnhCLPoVa) received 200 payouts totalling 52.98 APPLx, about $17,800 today. The same page shows those payouts fell 97% from one week to the next. Nothing else shows a holder this.
+
+Every coin page carries a public proof feed of its distributions. For example, [AGI pays holders in Anthropic PreStocks](https://stonk-ledger.vercel.app/coin/CaWZeUM4FvX9dPkjGc2xHS6tSN3qJfTWyvaG77aM5o7h): 481 recorded batches, 4,349 dividends.
+
+## The reinvestment: Stock DRIP
+
+Connect the wallet, sign one capped token approval, and pick a target:
+
+- **Public stocks (xStocks):** SPYx, QQQx, NVDAx, APPLx, TSLAx, GLDx, MCDx.
+- **Pre-IPO (PreStocks):** OpenAI, Anthropic, SpaceX, Anduril, Neuralink, Polymarket, Kalshi, Figure AI.
+
+A keeper runs on a schedule several times a day. When your new payouts are worth at least $5, it sweeps them up to your cap, swaps them through Jupiter Ultra, and sends the stock back to your wallet. Each run leaves three signatures (transfer, swap, return) on your statement. The fee is 1% of the output. Revoke is one signed transaction.
+
+Any payout token Jupiter can route works as input, so a coin that pays in STONK, BONK, or PEPE can become SPYx or Anthropic PreStocks. Auto-compounders put payouts back into the meme coin; DRIP turns them into the asset you chose.
+
+**Proof on mainnet:** three DRIP runs so far, one made unattended by the scheduled keeper. First run: [transfer](https://solscan.io/tx/63pXozKtz2PMRjt3wPNFeK6pZ9pxSydpiamyxh6zi3qT1paKCnkX4yXXNneoaWs2Dp8pD6TY2qvNHN7MR5H13RiF) · [swap](https://solscan.io/tx/4uRAYhtbjE8EiCKZV8b5Zs2qjQdMaKFazHeBeyUVdMtQBirBxvbiEq9YbYP2Ur74chKTXXMSpgUFbckX62pXE3SE) · [return](https://solscan.io/tx/4WLjeFx5BCH3aTfcRHqkTugzhqcbbCm5dKmLcX6ScHe4yV552QQM1bg6SCPH6xAFxTZQKnqjMF3NrZDHxi1FHmpN). All runs are listed at https://stonk-ledger.vercel.app/drip.
+
+## Why PreStocks
+
+PreStocks tokens are already money to thousands of wallets: they are the payout asset of over 1,500 StonkFun coins. Stonk Ledger makes those PreStocks dividends visible and provable per wallet, and makes every PreStocks token a DRIP target, so any payout stream, whatever it pays in, can become pre-IPO exposure. The target list is checked against the PreStocks API in a test. PreStocks is the only pre-IPO issuer the app integrates.
+
+## Why Solana
+
+- The payouts are transfer-tax distributions that exist only on Solana.
+- A capped delegation is a native token-program primitive (`ApproveChecked`), so non-custodial DRIP needs no smart contract and no custody.
+- Jupiter routes into xStocks and PreStocks tokens (Token-2022) today.
+
+## Trust model
+
+- The holder signs one `ApproveChecked` with a cap they choose. The keeper can move only that token, only up to the cap, only payouts that arrived after the approval.
+- The app records a delegation only for an approval the wallet itself signed, checked on chain.
+- Each run is a recorded state machine. Every signature is stored before its transaction is sent, and a run interrupted mid-way is finished on the next pass. Quote tokens are refunded only if no swap landed; a landed swap is always returned, with the amount read from chain.
+- The keeper refuses a Jupiter quote that would lose more than 2%.
+- Full notes: `docs/SECURITY.md`.
+
+## How it is built
+
+- Next.js 16 on Vercel, `@solana/kit` 7 with wallet-standard signing, Postgres on Neon (Drizzle), Helius for RPC and parsed history, Jupiter Ultra for swaps and Jupiter Price for valuation.
+- Scheduled jobs on GitHub Actions: price snapshots, the DRIP keeper, and a pull of the distributors' newest batches for the proof feeds.
+- The payout classifier is a fixed rule (tokens leave a StonkFun distributor wallet, no DEX program in the transaction), tested against captured mainnet transactions. Mainnet changed under us twice during the build: StonkFun moved fee paying to new wallets, then moved most payouts to a second distributor. Both changes are documented in `docs/RESEARCH.md` with regression tests.
+- Every coin is a config row seeded from the StonkFun API. Nothing is hand-picked.
+- 76 tests, including the classifier and the keeper against mainnet fixtures.
+
+## Known limits
+
+- The proof feed per coin is a recent sample. StonkFun sends over 100,000 distributor transactions a day, more than the free tier of our data provider can read. A wallet's statement always reads that wallet's full history.
+- USD at receipt uses a recorded price when one exists within two hours of the payout; otherwise it is estimated from today's price and labelled.
+- DRIP has run only on the builder's own wallet so far.
 
 Informational only. Not tax or investment advice.
+```
 
-## 2. Pitch video script (3 minutes, product only, no slides)
+## 3. Form checklist
 
-Screen recording of the live site. Wallets and clicks in order. Rehearse once; the pages are fast except the first statement load, which indexes from Helius (5 to 15 seconds).
-
-**Before recording:** open `/drip` with the owner wallet `88tvtBFWdb814MGm2PoGXXDqpEvntpxEwC8ayhbbJoN` connected and click **Raise cap** so a delegation is active, then close the tab. Preload `/wallet/4di7dpumucn9xr3Wt2SpMxP1kjpX7iM8KhgtnhCLPoVa` once so it is indexed.
-
-| Time | Screen                                                                                                                | Say                                                                                                                                                                                                                                                            |
-| ---- | --------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0:00 | Home, https://stonk-ledger.vercel.app                                                                                 | "Your memecoin pays you in Apple. Thousands of Solana meme coins pay holders in tokenized stocks. Nobody shows you what you were paid, and nobody lets you choose the stock. Stonk Ledger does both."                                                          |
-| 0:15 | Click the example link "a top TREE holder, paid in APPLx"                                                             | "This is a real wallet, a top holder of TREE, a meme coin that pays holders in Apple stock."                                                                                                                                                                   |
-| 0:30 | Statement `/wallet/4di7dpumucn9xr3Wt2SpMxP1kjpX7iM8KhgtnhCLPoVa`: point at the big number                             | "181 dividends. Fifty-one shares of APPLx, worth about seventeen thousand dollars today. Each line is one payout."                                                                                                                                             |
-| 0:50 | Click one proof link, Solscan opens                                                                                   | "Every payout links to its transaction. This is a receipt, not a dashboard." Close Solscan.                                                                                                                                                                    |
-| 1:05 | Scroll to the DRIP link on the statement, click through to `/drip`, connect the owner wallet                          | "Now the part that matters: what if you wanted S&P exposure instead of Apple, or a pre-IPO token? Stock DRIP."                                                                                                                                                 |
-| 1:20 | `/drip`: select KNOTS (pays STONK), show the target picker with the three groups                                      | "One approval, capped by you. Pick the target: public stocks, PreStocks pre-IPO, or Tessera pre-IPO. A keeper checks every ten minutes, sweeps new payouts up to your cap, swaps through Jupiter, and sends the stock back to your wallet."                    |
-| 1:45 | Point at the disclosure panel                                                                                         | "It never holds your keys. It can move nothing but the delegated amount. Revoke is one signature."                                                                                                                                                             |
-| 1:55 | Scroll to the runs table on `/drip` or on the owner's statement `/wallet/88tvtBFWdb814MGm2PoGXXDqpEvntpxEwC8ayhbbJoN` | "Three runs on mainnet. Transfer, swap, return: three signatures each. This one went into SPYx while I was asleep, from the scheduled keeper. This one went into T-OpenAI, a Tessera pre-IPO token." Click the swap signature; Solscan shows the Jupiter swap. |
-| 2:25 | `/coins`, then click AGI                                                                                              | "It works for every coin on the platform from config. AGI pays holders in Anthropic PreStocks: 477 batches, 4,281 dividends recorded, each batch linked."                                                                                                      |
-| 2:40 | `/api/og/4di7dpumucn9xr3Wt2SpMxP1kjpX7iM8KhgtnhCLPoVa` (the share card)                                               | "Every statement has a share card."                                                                                                                                                                                                                            |
-| 2:48 | Back to home                                                                                                          | "Stonk Ledger: the receipt and the reinvestment. Live on mainnet, every coin, any stock as the target."                                                                                                                                                        |
-
-## 3. Technical video script (5 minutes)
-
-Screen: repo in the editor, `docs/RESEARCH.md`, `docs/SECURITY.md`, terminal for tests. Keep each section to its time.
-
-| Time | Show                                                                                          | Say                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| ---- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0:00 | README architecture section                                                                   | "Two halves that talk only through Postgres: a Next.js app on Vercel and one-shot jobs on GitHub Actions. Helius for RPC and enhanced transactions, Jupiter for swaps, Neon for the database."                                                                                                                                                                                                                                    |
-| 0:30 | `docs/RESEARCH.md`, distributor section                                                       | "Day one was finding who pays. One platform wallet distributes for every coin. Batches are plain token transfers to 16 to 20 destinations, no DEX program. That is the classifier rule."                                                                                                                                                                                                                                          |
-| 1:00 | `docs/RESEARCH.md`, fee payer change                                                          | "On September 17 StonkFun moved fee paying to separate wallets. Our rule keyed on the fee payer and silently rejected every batch. I replayed the distributor's history, changed the rule to 'tokens leave the distributor wallet', and captured the new batch shape as a fixture. Mainnet changes under you; the tests carry the evidence."                                                                                      |
-| 1:30 | `lib/classify.ts` and `tests/classify.test.ts`, `tests/new-feepayer.test.ts`; run `pnpm test` | "Classifier and keeper are tested against real mainnet transactions, not mocks. 48 tests."                                                                                                                                                                                                                                                                                                                                        |
-| 2:00 | `lib/db/schema.ts`: `payouts`, `payout_batches`, `drip_delegations`, `drip_runs`              | "Payouts are keyed by signature and wallet because one batch pays many wallets. Ingestion stores one row per batch for the feed and per-recipient rows only for wallets someone viewed or delegated. The first version stored every recipient and filled a half-gigabyte database in three days; that redesign is in the commit history."                                                                                         |
-| 2:40 | `lib/jobs/ingest-distributor.ts` and `.github/workflows/keeper.yml`                           | "Fresh batches are pulled from the distributor's history every ten minutes, a few Helius calls per pass, nothing running in between. The first version was a webhook firing fifty thousand times a day; I replaced it once the numbers came in. Inserts are idempotent, so overlapping pulls cannot duplicate."                                                                                                                   |
-| 3:00 | `docs/SECURITY.md`, then `lib/drip/run.ts`                                                    | "The keeper trust model. The holder signs one ApproveChecked with a cap. The keeper reads the delegate on chain before every run, sweeps min of pending, remaining cap, and balance, only above a threshold. Transfer, Jupiter Ultra swap, return of 99 percent. If the swap fails after the transfer, it refunds. The only trust window is the seconds between transfer and return, and it is disclosed on the approval screen." |
-| 3:45 | `/drip` approve flow in the browser, `app/lib/send-via-wallet.ts`                             | "Wallet-standard signing with @solana/kit. The wallet signs, a server relay submits so the browser never sees the RPC key, and the page polls signature status. No websocket."                                                                                                                                                                                                                                                    |
-| 4:10 | `lib/drip/targets.ts`, `tests/drip-targets.test.ts`                                           | "Targets are config. xStocks, PreStocks, Tessera, all Token-2022. The test checks every mint against the issuers' own APIs. Adding a target is one entry."                                                                                                                                                                                                                                                                        |
-| 4:30 | Risks, spoken plainly                                                                         | "Three honest limits. The keeper runs on a cron with a five-minute floor, so a sweep can lag. Two coins that pay the same quote token share one delegation, and attribution between them is by position size, flagged when close. USD at receipt before September 13 has no price snapshot and is shown as estimated or blank."                                                                                                   |
-| 4:50 | Repo root                                                                                     | "Public, MIT, five-minute setup in the README, seed script, fixture tests. Thanks."                                                                                                                                                                                                                                                                                                                                               |
-
-## 4. Form checklist
-
-1. Register on hackathons.solana.com (owner).
-2. Submit Project: name "Stonk Ledger", description from section 1.
-3. Links: live URL, repo URL, both video URLs.
-4. Select tracks: Main, Best Use of PreStocks, Best Use of Tessera.
-5. Before submitting: raise the test wallet's cap on `/drip` so a delegation is active for judges; open the statement and `/drip` on a phone once.
-6. Submit by 2026-09-23. Re-check the live site on 2026-09-24.
+1. Open https://hackathons.solana.com/hackathons/stocklana and sign in (register first if needed).
+2. Click **Submit Project**. Name: "Stonk Ledger".
+3. Paste the short description (section 1) and the full description (section 2, without the code fence).
+4. Live URL and repo URL from the top of this file.
+5. Select **Main track** and **Best Use of PreStocks**. Not Tessera.
+6. Submit before 2026-09-25, 4 pm ET.
