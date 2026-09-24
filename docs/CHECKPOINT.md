@@ -21,14 +21,19 @@ Worth submitting, but only after fixes. Three reviews ran: DRIP money path, ledg
 
 76 tests pass. `pnpm build`, typecheck, and lint are clean.
 
-### Not done, in order
+### 2026-09-24: submitting without videos
 
-1. Owner approval, then `pnpm tsx scripts/maintenance/fix-distributor-rows.ts --apply`.
-2. Rewrite `docs/SUBMISSION.md`: PreStocks only, "any payout into any stock", Slawth comparison, and corrected numbers (the review found most figures stale or false; see the claim table in this session's review). Rewrite both video scripts to match.
-3. Owner: re-approve DRIP with the test wallet `88tv…`. Threshold is now at least $1. Make one run of $5 or more, ideally into a PreStocks token.
-4. Owner: check the statement and `/drip` on a phone (Chrome resize still fails, so 375px is unverified).
-5. Optional, highest value: ask 3 to 5 StonkFun holders (TREE, AGI, KNOTS communities) to open their statement and try DRIP.
-6. Record videos, submit on Sep 25 morning.
+The owner is short on time (Turbin3 capstone, SolEnrich traction) and chose to submit without videos; the form requires only one link.
+
+- Repair applied with owner approval: deleted 5,443 funding-transfer batch rows, kept 846 real one-recipient batches, confirmed 188 probable payouts (test wallet now 0 probable).
+- `docs/SUBMISSION.md` (`77b3b21`) holds the short and full descriptions, figures checked against production on 2026-09-24, and the form checklist.
+- **Final live check 2026-09-24 23:49 UTC:** health ok (6,582 coins, 1,513 PreStocks-paid); `/`, `/drip`, `/coins`, both demo statements, the AGI coin page, `/api/drip/public`, and the OG card all 200; latest keeper, prices, and rewards runs green; no "ten minutes" or Tessera on the served pages.
+
+### Remaining
+
+1. Owner: submit at https://hackathons.solana.com/hackathons/stocklana before 2026-09-25 4 pm ET. Main track + Best Use of PreStocks only. Paste both descriptions from `docs/SUBMISSION.md`.
+2. Not planned: videos, a new DRIP run (the test wallet earns about $0.06 a day, so a $5 run is not reachable), phone check (375px still unverified), outreach to holders.
+3. If the project is shelved after submission: disable the four scheduled workflows to stop Helius credit and Actions use. The site can stay up; no delegation is active.
 
 Post-hackathon from the review: statement stop cursor per token account (`wallets.lastIndexedSig`), keeper address as a public env var (remove the secret from Vercel), per-IP rate limit on `/api/drip/status`, auto-detect new distributor wallets, CSV export of payouts with USD at receipt, historical prices for USD at receipt (89% of recent rows are estimated because prices run only several times a day).
 
