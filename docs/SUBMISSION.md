@@ -13,9 +13,9 @@ Every figure below was checked against production on 2026-09-24.
 
 ## 1. Short description
 
-> Paste any Solana wallet to see every tokenized-stock dividend it earned from StonkFun meme coins, each with an onchain receipt. Then turn future payouts into a stock you pick, like SPYx or a PreStocks pre-IPO token, with one capped, non-custodial approval.
+> Paste any Solana wallet to see every tokenized-stock dividend it earned from StonkFun meme coins, each with an onchain receipt. Connect your own wallet to turn your future payouts into a stock you pick, like SPYx or a PreStocks pre-IPO token, with one capped approval.
 
-256 characters (form limit 280).
+268 characters (form limit 280). Viewing works for any wallet; DRIP only for the connected wallet's own payouts.
 
 ## 2. Full description (markdown)
 
