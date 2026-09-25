@@ -13,7 +13,9 @@ Every figure below was checked against production on 2026-09-24.
 
 ## 1. Short description
 
-> Stonk Ledger shows every tokenized-stock dividend a Solana wallet earned from StonkFun reward coins, with an on-chain proof link for each payout. Stock DRIP turns that payout stream into the stock you choose, SPYx or a PreStocks pre-IPO token, with one capped approval and no custody.
+> Paste any Solana wallet to see every tokenized-stock dividend it earned from StonkFun meme coins, each with an onchain receipt. Then turn future payouts into a stock you pick, like SPYx or a PreStocks pre-IPO token, with one capped, non-custodial approval.
+
+256 characters (form limit 280).
 
 ## 2. Full description (markdown)
 
