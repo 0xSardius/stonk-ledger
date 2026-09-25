@@ -29,6 +29,12 @@ The owner is short on time (Turbin3 capstone, SolEnrich traction) and chose to s
 - `docs/SUBMISSION.md` (`77b3b21`) holds the short and full descriptions, figures checked against production on 2026-09-24, and the form checklist.
 - **Final live check 2026-09-24 23:49 UTC:** health ok (6,582 coins, 1,513 PreStocks-paid); `/`, `/drip`, `/coins`, both demo statements, the AGI coin page, `/api/drip/public`, and the OG card all 200; latest keeper, prices, and rewards runs green; no "ten minutes" or Tessera on the served pages.
 
+- **DRIP approval smoke test passed on production (2026-09-25 00:56 UTC),** the first live test of the Sep 23 signed-approval check. The owner approved from the test wallet `88tv…` into ANTHROPIC (PreStocks), and all steps in the UI succeeded. Verified server-side:
+  - The delegation row is active: coin 902 (KNOTS), target ANTHROPIC, cap 5.103141 STONK, threshold $5.
+  - The approval tx `27ahtVAy…` is a successful `approveChecked`, owner `88tv…`, delegate keeper `Hsmuc8GQ…`.
+  - `/api/drip/public` shows 1 active delegation.
+  - Not tested live: a keeper run with the new state machine. The wallet earns about $0.06 a day, so the $5 threshold will not be reached before the deadline.
+
 ### Remaining
 
 1. Owner: submit at https://hackathons.solana.com/hackathons/stocklana before 2026-09-25 4 pm ET. Main track + Best Use of PreStocks only. Paste both descriptions from `docs/SUBMISSION.md`.
